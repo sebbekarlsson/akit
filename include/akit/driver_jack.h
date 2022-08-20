@@ -5,4 +5,5 @@ int akit_driver_jack_setup(AkitDriver* driver);
 int akit_driver_jack_destroy(AkitDriver* driver);
 int akit_driver_jack_buffer_data(AkitDriver* driver, float* buffer, int64_t length);
 int akit_driver_jack_flush(AkitDriver* driver);
+int akit_driver_jack_prepare(AkitDriver* driver);
 #endif

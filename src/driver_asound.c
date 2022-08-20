@@ -144,6 +144,19 @@ int akit_driver_asound_destroy(AkitDriver *driver) {
   return 1;
 }
 
+int akit_driver_asound_prepare(AkitDriver* driver) {
+    if (!driver->driver)
+    return 0;
+  if (driver->type != AKIT_DRIVER_TYPE_ASOUND)
+    return 0;
+  if (!driver->initialized)
+    return 0;
+
+  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+  snd_pcm_prepare(asound->pcm_handle);
+  return 1;
+}
+
 int akit_driver_asound_flush(AkitDriver* driver) {
   if (!driver->driver)
     return 0;

@@ -21,3 +21,8 @@ int akit_driver_jack_flush(AkitDriver* driver) {
   fprintf(stderr, "JACK is not implemented.\n");
   return 0;
 }
+
+int akit_driver_jack_prepare(AkitDriver* driver) {
+  fprintf(stderr, "JACK is not implemented.\n");
+  return 0;
+}

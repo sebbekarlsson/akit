@@ -82,7 +82,7 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
       clip->time_pushed = time;
     }
 
-    if (clip->finished) {
+    if (clip->finished && clip->cursor > 0) {
       akit_sound_clip_destroy(clip);
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);
@@ -148,6 +148,12 @@ void *akit_engine_thread(void *ptr) {
 
     pthread_mutex_lock(&engine->push_lock);
     akit_engine_clear_sounds(engine);
+
+    if (akit_array_is_empty(&engine->clips)) {
+      akit_driver_prepare(&engine->driver);
+      akit_msleep(time_unit * 1000);
+    }
+
     pthread_mutex_unlock(&engine->push_lock);
 
     if (!engine->tape) continue;

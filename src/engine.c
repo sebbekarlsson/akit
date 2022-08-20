@@ -127,7 +127,7 @@ int akit_engine_clear_sounds(AkitEngine* engine) {
     double time_pushed = clip->time_pushed;
     double diff = now - time_pushed;
 
-    if (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH) {
+    if (clip->cursor > 0 && (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH)) {
       akit_sound_clip_destroy(clip);
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);

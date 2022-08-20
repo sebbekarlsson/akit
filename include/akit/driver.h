@@ -35,6 +35,7 @@ int akit_driver_buffer_data(AkitDriver* driver, float* buffer, int64_t length);
 int akit_driver_destroy(AkitDriver* driver);
 
 int akit_driver_flush(AkitDriver* driver);
+int akit_driver_prepare(AkitDriver* driver);
 
 
 #endif
