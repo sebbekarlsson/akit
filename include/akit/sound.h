@@ -21,6 +21,7 @@ typedef struct {
   int64_t frame;
   bool finished;
   int64_t cursor;
+  double time_pushed;
 } AkitSoundClip;
 
 

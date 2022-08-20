@@ -68,6 +68,7 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   AkitSoundClip* clip = NEW(AkitSoundClip);
   clip->finished = false;
   clip->cursor = 0;
+  clip->time_pushed = 0;
 
   AkitSound snd = sound;
   snd.data = (float*)calloc(sound.length, 1);
@@ -117,4 +118,26 @@ int akit_engine_set_listener(AkitEngine* engine, AkitListener listener) {
 
 AkitListener akit_engine_get_listener(AkitEngine engine) {
   return engine.listener;
+}
+
+int akit_engine_clear_sounds(AkitEngine* engine) {
+  if (!engine->initialized) return 0;
+  if (!engine->clips.length) return 0;
+
+  double now = engine->time;
+
+  for (int64_t i = 0; i < engine->clips.length; i++) {
+    AkitSoundClip *clip = (AkitSoundClip *)engine->clips.items[i];
+
+    double time_pushed = clip->time_pushed;
+    double diff = now - time_pushed;
+
+    if (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH) {
+      akit_sound_clip_destroy(clip);
+      akit_array_remove(&engine->clips, clip, free);
+      printf("Destroying sound clip.\n");
+    }
+  }
+
+  return 1;
 }

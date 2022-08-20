@@ -56,6 +56,8 @@ int akit_engine_clear_tape(AkitEngine* engine);
 
 int akit_engine_set_listener(AkitEngine* engine, AkitListener listener);
 
+int akit_engine_clear_sounds(AkitEngine* engine);
+
 AkitListener akit_engine_get_listener(AkitEngine engine);
 
 #endif

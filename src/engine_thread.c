@@ -83,6 +83,10 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
   for (int64_t i = 0; i < engine->clips.length; i++) {
     AkitSoundClip *clip = (AkitSoundClip *)engine->clips.items[i];
 
+    if (clip->time_pushed <= 0.0f) {
+      clip->time_pushed = time;
+    }
+
     if (clip->finished) {
       akit_sound_clip_destroy(clip);
       akit_array_remove(&engine->clips, clip, free);
@@ -144,6 +148,8 @@ void *akit_engine_thread(void *ptr) {
       akit_engine_clear_tape(engine);
       engine->tape = (float *)calloc(tape_length*3, sizeof(float));
     }
+
+    akit_engine_clear_sounds(engine);
 
     if (!engine->tape) continue;
 
