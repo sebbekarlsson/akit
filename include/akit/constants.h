@@ -3,4 +3,5 @@
 #define AKIT_SAMPLE_RATE 44100
 #define AKIT_FRAME_LENGTH 1024
 #define AKIT_CHANNELS 2
+#define AKIT_MAX_SOUNDS 4
 #endif

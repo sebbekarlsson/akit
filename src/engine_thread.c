@@ -149,8 +149,10 @@ void *akit_engine_thread(void *ptr) {
 
     akit_driver_flush(&engine->driver);
 
+    pthread_mutex_lock(&engine->push_lock);
     akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
                         engine->time, engine->frame);
+    pthread_mutex_unlock(&engine->push_lock);
 
     akit_driver_buffer_data(&engine->driver, &engine->tape[engine->frame],
                             frame_length);

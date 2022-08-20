@@ -23,6 +23,11 @@ int akit_engine_start(AkitEngine* engine) {
     return 0;
   }
 
+  if (pthread_mutex_init(&engine->process_lock, 0)) {
+    fprintf(stderr, "(Akit): Failed to create mutex.\n");
+    return 0;
+  }
+
   if (pthread_create(&engine->thread_id, 0, akit_engine_thread, engine)) {
     fprintf(stderr, "(Akit): Failed to create thread.\n");
     return 0;
@@ -49,6 +54,15 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   if (sound.data == 0) return 0;
   if (sound.length == 0) return 0;
 
+
+  pthread_mutex_trylock(&engine->process_lock);
+  if (engine->clips.length >= AKIT_MAX_SOUNDS) {
+    fprintf(stderr, "(Akit): Sound buffer is full, please try again later.\n");
+    pthread_mutex_unlock(&engine->process_lock);
+    return 0;
+  }
+  pthread_mutex_unlock(&engine->process_lock);
+
   sound.sample_rate = OR(sound.sample_rate, akit_engine_get_sample_rate(engine));
 
   AkitSoundClip* clip = NEW(AkitSoundClip);
@@ -56,13 +70,15 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   clip->cursor = 0;
 
   AkitSound snd = sound;
-  snd.data = (float*)calloc(sound.length, sizeof(float));
+  snd.data = (float*)calloc(sound.length, 1);
   memcpy(&snd.data[0], &sound.data[0], sound.length);
 
   clip->sound = snd;
 
 
+  pthread_mutex_trylock(&engine->process_lock);
   akit_array_push(&engine->clips, clip);
+  pthread_mutex_unlock(&engine->process_lock);
 
   return 1;
 }

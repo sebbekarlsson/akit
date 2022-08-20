@@ -29,6 +29,7 @@ typedef struct {
 
   pthread_t thread_id;
   pthread_mutex_t push_lock;
+  pthread_mutex_t process_lock;
 
   double time;
   int64_t frame;
