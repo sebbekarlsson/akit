@@ -31,11 +31,6 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
   akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
 
-  if (left_gain <= 0.0f && right_gain <= 0.0f) {
-    return;
-  }
-
-
   if (clip_channels >= 2) {
     for (int64_t i = 0; i < length; i++) {
 
@@ -148,9 +143,12 @@ void *akit_engine_thread(void *ptr) {
       engine->frame = 0;
       akit_engine_clear_tape(engine);
       engine->tape = (float *)calloc(tape_length*3, sizeof(float));
+      akit_msleep(time_unit * 1000);
     }
 
+    pthread_mutex_lock(&engine->push_lock);
     akit_engine_clear_sounds(engine);
+    pthread_mutex_unlock(&engine->push_lock);
 
     if (!engine->tape) continue;
 
