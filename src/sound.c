@@ -13,6 +13,10 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener, float* left
   Vector3 right_dir = vector3_scale(left_dir, -1);
 
 
+  printf("Listener:\n");
+  printf("Position: ");
+  VEC3_PRINT(listener.position); printf("\n");
+
   float distance = fabsf(vector3_distance3d(sound.position, listener.position)) / far;
   if (distance <= 0.0f) distance = 1.0f;
 
