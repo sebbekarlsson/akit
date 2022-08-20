@@ -1,0 +1,10 @@
+-std=gnu99
+-I/usr/local/include
+-I/usr/include
+-I/usr/include/freetype2
+-I./build/_deps/cglm-src/include
+-I./build/_deps/hashmap_static-src/include
+-I./build/_deps/waves_static-src/include
+-I./build/_deps/vec3_static-src/include
+-I./include
+-I./modell/include
