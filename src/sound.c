@@ -33,10 +33,11 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener, float* left
 }
 
 void akit_sound_clip_destroy(AkitSoundClip* clip) {
-  if (clip->sound.data != 0) {
-    free(clip->sound.data);
-    clip->sound.data = 0;
-  }
+  clip->sound.data = 0;
+//  if (clip->sound.data != 0) {
+//    free(clip->sound.data);
+//    clip->sound.data = 0;
+//  }
 
   clip->cursor = 0;
   clip->frame = 0;

@@ -89,8 +89,9 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
 
     if (clip->finished) {
       akit_sound_clip_destroy(clip);
-      akit_array_remove(&engine->clips, clip, free);
-      // TODO: cleanup
+      akit_array_remove(&engine->clips, clip, 0);
+      free(clip);
+      clip = 0;
     } else {
       akit_engine_process_clip(engine, clip, buffer, length, time, frame);
     }

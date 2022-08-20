@@ -69,12 +69,7 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   clip->finished = false;
   clip->cursor = 0;
   clip->time_pushed = 0;
-
-  AkitSound snd = sound;
-  snd.data = (float*)calloc(sound.length, 1);
-  memcpy(&snd.data[0], &sound.data[0], sound.length);
-
-  clip->sound = snd;
+  clip->sound = sound;
 
 
   pthread_mutex_trylock(&engine->process_lock);
@@ -134,7 +129,9 @@ int akit_engine_clear_sounds(AkitEngine* engine) {
 
     if (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH) {
       akit_sound_clip_destroy(clip);
-      akit_array_remove(&engine->clips, clip, free);
+      akit_array_remove(&engine->clips, clip, 0);
+      free(clip);
+      clip = 0;
       printf("Destroying sound clip.\n");
     }
   }
