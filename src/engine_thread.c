@@ -160,8 +160,8 @@ void *akit_engine_thread(void *ptr) {
     akit_msleep(time_unit * 1000);
 
 
-    engine->listener.position = VEC3(cosf(engine->time), tanf(engine->time), sinf(engine->time));
-    engine->listener.forward = VEC3(sinf(engine->time), tanf(engine->time), cosf(engine->time));
+  //  engine->listener.position = VEC3(cosf(engine->time), tanf(engine->time), sinf(engine->time));
+  //  engine->listener.forward = VEC3(sinf(engine->time), tanf(engine->time), cosf(engine->time));
 
 
     if (engine->stopped || !engine->running) {
