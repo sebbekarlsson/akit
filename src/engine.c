@@ -85,8 +85,7 @@ float akit_engine_get_sample_rate(AkitEngine* engine) {
 }
 
 int64_t akit_engine_get_frame_length(AkitEngine* engine) {
-  return 512;
-  return OR(engine->driver.info.frame_length, AKIT_FRAME_LENGTH);
+  return OR(engine->driver.info.frame_length, OR(engine->config.driver_config.frame_length, AKIT_FRAME_LENGTH));
 }
 
 int64_t akit_engine_get_channels(AkitEngine* engine) {

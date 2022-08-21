@@ -37,5 +37,7 @@ int akit_driver_destroy(AkitDriver* driver);
 int akit_driver_flush(AkitDriver* driver);
 int akit_driver_prepare(AkitDriver* driver);
 
+int64_t akit_driver_get_avail(AkitDriver* driver);
+
 
 #endif

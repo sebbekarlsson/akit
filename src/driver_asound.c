@@ -8,6 +8,7 @@
 
 #define AKIT_DRIVER_ASOUND_PCM_DEVICE "default"
 
+
 int akit_driver_asound_setup(AkitDriver *driver) {
   if (driver->driver) {
     fprintf(stderr, "Driver already setup!\n");
@@ -28,6 +29,20 @@ int akit_driver_asound_setup(AkitDriver *driver) {
   snd_pcm_hw_params_alloca(&asound->params);
   snd_pcm_hw_params_any(asound->pcm_handle, asound->params);
 
+  snd_pcm_sw_params_alloca(&asound->sw_params);
+
+  /*
+   *
+   * snd_pcm_set_params(handle,
+                                  SND_PCM_FORMAT_S16_LE,
+                                  SND_PCM_ACCESS_RW_INTERLEAVED,
+                                  1, //channels
+                                  44100, //sample rate
+                                  1, //allow resampling
+                                  500000
+   */
+
+
   if ((asound->pcm =
            snd_pcm_hw_params_set_access(asound->pcm_handle, asound->params,
                                         SND_PCM_ACCESS_RW_INTERLEAVED)) < 0)
@@ -47,6 +62,25 @@ int akit_driver_asound_setup(AkitDriver *driver) {
            asound->pcm_handle, asound->params, &sample_rate, 0)) < 0)
     fprintf(stderr, "ERROR: Can't set rate. %s\n", snd_strerror(asound->pcm));
 
+
+
+  uint64_t min_period = driver->config.frame_length;
+  snd_pcm_hw_params_set_period_size(asound->pcm_handle, asound->params, min_period, 0);
+  snd_pcm_hw_params_set_period_size_max(asound->pcm_handle, asound->params, &min_period, 0);
+  driver->info.frame_length = min_period;
+
+
+    snd_pcm_sw_params_set_avail_min(asound->pcm_handle, asound->sw_params, min_period);
+
+
+  if (snd_pcm_sw_params_set_start_threshold(asound->pcm_handle, asound->sw_params, min_period) < 0) {
+    fprintf(stderr, "ERROR: Can't set start threshold.\n");
+  }
+
+    if ((asound->pcm = snd_pcm_sw_params(asound->pcm_handle, asound->sw_params)) < 0) {
+      fprintf(stderr, "ERROR: Can't set sw params.\n");
+    }
+
   if ((asound->pcm = snd_pcm_hw_params(asound->pcm_handle, asound->params)) < 0)
     fprintf(stderr, "ERROR: Can't set harware parameters. %s\n",
             snd_strerror(asound->pcm));
@@ -61,23 +95,20 @@ int akit_driver_asound_setup(AkitDriver *driver) {
     printf("(stereo)\n");
   }
 
+
+
+
+
   snd_pcm_hw_params_get_rate(asound->params, &tmp, 0);
-  printf("rate: %d bps\n", tmp);
   driver->info.sample_rate = tmp;
   sample_rate = tmp;
 
-  /* Allocate buffer to hold single period */
-  // snd_pcm_hw_params_get_period_size(params, &frames, 0);
-  uint64_t min_period = driver->config.frame_length;
-  snd_pcm_hw_params_set_period_size_near(asound->pcm_handle, asound->params,
-                                         &min_period, 0);
 
-  snd_pcm_hw_params_get_period_time(asound->params, &tmp, NULL);
-  printf("frame_length: %d\n", tmp);
-  driver->info.frame_length = tmp;
+  //snd_pcm_hw_params_get_period_time(asound->params, &tmp, NULL);
 
 
   snd_pcm_nonblock(asound->pcm_handle, 1);
+
 
   while (snd_pcm_state(asound->pcm_handle) != SND_PCM_STATE_PREPARED) {
     akit_msleep(1);
@@ -113,6 +144,7 @@ int akit_driver_asound_buffer_data(AkitDriver *driver, float *buffer,
 
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
   int err = 0;
+
   if ((err = snd_pcm_writei(asound->pcm_handle, buffer, length)) < 0) {
     fprintf(stderr, "XRUN.\n");
     snd_pcm_recover(asound->pcm_handle, err, 0);
@@ -171,4 +203,20 @@ int akit_driver_asound_flush(AkitDriver* driver) {
   snd_pcm_nonblock(asound->pcm_handle, 1);
 
   return 1;
+}
+
+int64_t akit_driver_asound_get_avail(AkitDriver* driver) {
+    if (!driver->driver)
+    return 0;
+  if (driver->type != AKIT_DRIVER_TYPE_ASOUND)
+    return 0;
+  if (!driver->initialized)
+    return 0;
+
+  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+
+  snd_pcm_sframes_t avail;
+  avail = snd_pcm_avail_update(asound->pcm_handle);
+
+  return (int64_t)avail;
 }

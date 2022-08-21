@@ -7,6 +7,8 @@
 #define AKIT_SAMPLE_TOLERANCE 1.001f
 #define AKIT_SILENCE 0.000001f
 
+
+
 static float fix_sample(float sample) {
   if (isinf(sample) || isnan(sample)) return AKIT_SILENCE;
   if (sample < -AKIT_SAMPLE_TOLERANCE) return AKIT_SILENCE;
@@ -168,6 +170,8 @@ void *akit_engine_thread(void *ptr) {
 
     if (!engine->tape) continue;
 
+   // int64_t avail = akit_driver_get_avail(&engine->driver);
+
     akit_driver_flush(&engine->driver);
 
     pthread_mutex_lock(&engine->push_lock);
@@ -178,6 +182,7 @@ void *akit_engine_thread(void *ptr) {
     akit_driver_buffer_data(&engine->driver, &engine->tape[engine->frame],
                             frame_length);
 
+ //   printf("Avail: %ld\n", avail / 2);
     engine->frame += frame_length * channels;
     engine->time += time_unit;
     akit_msleep(time_unit * 1000);
