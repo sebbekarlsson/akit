@@ -76,9 +76,8 @@ int akit_driver_flush(AkitDriver *driver) {
   return 0;
 }
 
-
-int akit_driver_prepare(AkitDriver* driver) {
-    switch (driver->type) {
+int akit_driver_prepare(AkitDriver *driver) {
+  switch (driver->type) {
   case AKIT_DRIVER_TYPE_ASOUND:
     return akit_driver_asound_prepare(driver);
     break;
@@ -91,8 +90,8 @@ int akit_driver_prepare(AkitDriver* driver) {
   return 0;
 }
 
-int64_t akit_driver_get_avail(AkitDriver* driver) {
-      switch (driver->type) {
+int64_t akit_driver_get_avail(AkitDriver *driver) {
+  switch (driver->type) {
   case AKIT_DRIVER_TYPE_ASOUND:
     return akit_driver_asound_get_avail(driver);
     break;

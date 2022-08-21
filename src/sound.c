@@ -12,7 +12,6 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
                              float *left_gain, float *right_gain) {
   float left = 0.0f;
   float right = 0.0f;
-  float center = 0.0f;
 
   float dm = OR(listener.distance_multiplier, 1.0f);
 
@@ -53,12 +52,10 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
 }
 
 void akit_sound_clip_destroy(AkitSoundClip *clip) {
+  /*
+   * We assume who ever gave us the data will free it.
+   */
   clip->sound.data = 0;
-  //  if (clip->sound.data != 0) {
-  //    free(clip->sound.data);
-  //    clip->sound.data = 0;
-  //  }
-
   clip->cursor = 0;
   clip->frame = 0;
   clip->time = 0;

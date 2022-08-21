@@ -1,23 +1,25 @@
+#include <akit/constants.h>
 #include <akit/engine.h>
 #include <akit/macros.h>
-#include <akit/constants.h>
 #include <akit/utils.h>
 #include <string.h>
 
-
-int akit_engine_init(AkitEngine* engine, AkitEngineConfig config) {
-  if (engine->initialized) return 0;
+int akit_engine_init(AkitEngine *engine, AkitEngineConfig config) {
+  if (engine->initialized)
+    return 0;
   engine->initialized = true;
   engine->config = config;
-  akit_array_init(&engine->clips, sizeof(AkitSoundClip*));
+  akit_array_init(&engine->clips, sizeof(AkitSoundClip *));
   engine->stopped = true;
 
   return 1;
 }
 
-int akit_engine_start(AkitEngine* engine) {
-  if (!engine->initialized) return 0;
-  if (engine->running) return 0;
+int akit_engine_start(AkitEngine *engine) {
+  if (!engine->initialized)
+    return 0;
+  if (engine->running)
+    return 0;
 
   if (pthread_mutex_init(&engine->push_lock, 0)) {
     fprintf(stderr, "(Akit): Failed to create mutex.\n");
@@ -37,9 +39,11 @@ int akit_engine_start(AkitEngine* engine) {
   return 1;
 }
 
-int akit_engine_stop(AkitEngine* engine) {
-  if (!engine->initialized) return 0;
-  if (!engine->running) return 0;
+int akit_engine_stop(AkitEngine *engine) {
+  if (!engine->initialized)
+    return 0;
+  if (!engine->running)
+    return 0;
 
   engine->stopped = true;
   engine->running = false;
@@ -49,16 +53,20 @@ int akit_engine_stop(AkitEngine* engine) {
   return 1;
 }
 
-int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
-  if (!engine->running) return 0;
-  if (engine->stopped) return 0;
-  if (sound.data == 0) return 0;
-  if (sound.length == 0) return 0;
+int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
+  if (!engine->running)
+    return 0;
+  if (engine->stopped)
+    return 0;
+  if (sound.data == 0)
+    return 0;
+  if (sound.length == 0)
+    return 0;
   if (sound.gain <= 0.0f) {
-    fprintf(stderr, "(Akit): No use in pushing a sound with no gain. Will not push.\n");
-      return 0;
+    fprintf(stderr,
+            "(Akit): No use in pushing a sound with no gain. Will not push.\n");
+    return 0;
   }
-
 
   pthread_mutex_trylock(&engine->process_lock);
   if (engine->clips.length >= AKIT_MAX_SOUNDS) {
@@ -68,15 +76,15 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   }
   pthread_mutex_unlock(&engine->process_lock);
 
-  sound.sample_rate = OR(sound.sample_rate, akit_engine_get_sample_rate(engine));
+  sound.sample_rate =
+      OR(sound.sample_rate, akit_engine_get_sample_rate(engine));
 
-  AkitSoundClip* clip = NEW(AkitSoundClip);
+  AkitSoundClip *clip = NEW(AkitSoundClip);
   clip->finished = false;
   clip->cursor = 0;
   clip->time_pushed = 0;
   clip->sound = sound;
   clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
-
 
   pthread_mutex_trylock(&engine->process_lock);
   akit_array_push(&engine->clips, clip);
@@ -85,22 +93,24 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   return 1;
 }
 
-
-float akit_engine_get_sample_rate(AkitEngine* engine) {
+float akit_engine_get_sample_rate(AkitEngine *engine) {
   return OR(engine->driver.info.sample_rate, AKIT_SAMPLE_RATE);
 }
 
-int64_t akit_engine_get_frame_length(AkitEngine* engine) {
-  return OR(engine->driver.info.frame_length, OR(engine->config.driver_config.frame_length, AKIT_FRAME_LENGTH));
+int64_t akit_engine_get_frame_length(AkitEngine *engine) {
+  return OR(engine->driver.info.frame_length,
+            OR(engine->config.driver_config.frame_length, AKIT_FRAME_LENGTH));
 }
 
-int64_t akit_engine_get_channels(AkitEngine* engine) {
+int64_t akit_engine_get_channels(AkitEngine *engine) {
   return OR(engine->driver.info.channels, AKIT_CHANNELS);
 }
 
-int akit_engine_clear_tape(AkitEngine* engine) {
-  if (!engine->initialized) return 0;
-  if (!engine->tape) return 0;
+int akit_engine_clear_tape(AkitEngine *engine) {
+  if (!engine->initialized)
+    return 0;
+  if (!engine->tape)
+    return 0;
 
   free(engine->tape);
   engine->tape = 0;
@@ -108,9 +118,9 @@ int akit_engine_clear_tape(AkitEngine* engine) {
   return 1;
 }
 
-
-int akit_engine_set_listener(AkitEngine* engine, AkitListener listener) {
-  if (!engine->initialized) return 0;
+int akit_engine_set_listener(AkitEngine *engine, AkitListener listener) {
+  if (!engine->initialized)
+    return 0;
   engine->listener = listener;
 
   return 1;
@@ -120,9 +130,11 @@ AkitListener akit_engine_get_listener(AkitEngine engine) {
   return engine.listener;
 }
 
-int akit_engine_clear_sounds(AkitEngine* engine) {
-  if (!engine->initialized) return 0;
-  if (!engine->clips.length) return 0;
+int akit_engine_clear_sounds(AkitEngine *engine) {
+  if (!engine->initialized)
+    return 0;
+  if (!engine->clips.length)
+    return 0;
 
   double now = engine->time;
 
@@ -137,7 +149,6 @@ int akit_engine_clear_sounds(AkitEngine* engine) {
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);
       clip = 0;
-      //printf("Destroying sound clip.\n");
     }
   }
 
