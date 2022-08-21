@@ -132,7 +132,7 @@ int akit_engine_clear_sounds(AkitEngine* engine) {
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);
       clip = 0;
-      printf("Destroying sound clip.\n");
+      //printf("Destroying sound clip.\n");
     }
   }
 

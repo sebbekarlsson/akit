@@ -36,20 +36,20 @@ int main(int argc, char *argv[]) {
     .data = wav.data,
     .length = wav.length,
     .sample_rate = wav.header.sample_rate,
-    .position = VEC3(0, 0, 1),
+    .position = VEC3(-16.0f, 0, 1.0f),
     .duration = fmaxf(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align
   });
 
-  akit_msleep(2000);
+  akit_msleep(3000);
 
 
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
     .length = wav.length,
     .sample_rate = wav.header.sample_rate,
-    .position = VEC3(16.0f, 0.1f, 1),
+    .position = VEC3(16.0f, 0.0f, 1.0f),
     .duration = fmaxf(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align

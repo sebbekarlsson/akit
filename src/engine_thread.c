@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <akit/utils.h>
 
+#define AKIT_SAMPLE_TOLERANCE 1.001f
+#define AKIT_SILENCE 0.000001f
+
+static float fix_sample(float sample) {
+  if (isinf(sample) || isnan(sample)) return AKIT_SILENCE;
+  if (sample < -AKIT_SAMPLE_TOLERANCE) return AKIT_SILENCE;
+  if (sample > AKIT_SAMPLE_TOLERANCE) return AKIT_SILENCE;
+  return sample;
+}
 
 void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
                               float *buffer, int64_t length, double time, int64_t frame) {
@@ -42,6 +51,9 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
       *out_left += in_left * left_gain;
       *out_right += in_right * right_gain;
+
+      *out_left = fix_sample(*out_left);
+      *out_right = fix_sample(*out_right);
     }
 
   } else {
@@ -60,10 +72,8 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
       *out_left += in_left * left_gain;
       *out_right += in_right * right_gain;
 
-      // if (clip->frame >= clip_length) {
-      // clip->finished = true;
-      // break;
-      //  }
+      *out_left = fix_sample(*out_left);
+      *out_right = fix_sample(*out_right);
     }
   }
 
@@ -139,7 +149,7 @@ void *akit_engine_thread(void *ptr) {
   while (true) {
 
     if (engine->frame+(frame_length*channels) >= tape_length) {
-      printf("clear!\n");
+      //printf("clear!\n");
       engine->frame = 0;
       akit_engine_clear_tape(engine);
       engine->tape = (float *)calloc(tape_length*3, sizeof(float));
@@ -173,8 +183,8 @@ void *akit_engine_thread(void *ptr) {
     akit_msleep(time_unit * 1000);
 
 
-  //  engine->listener.position = VEC3(cosf(engine->time), tanf(engine->time), sinf(engine->time));
-  //  engine->listener.forward = VEC3(sinf(engine->time), tanf(engine->time), cosf(engine->time));
+//    engine->listener.position = vector3_add(engine->listener.position, VEC3(0.0f, 0, -0.5f));
+ //   engine->listener.forward = VEC3(cosf(engine->time*M_PI), 0, sinf(engine->time*M_PI));
 
 
     if (engine->stopped || !engine->running) {

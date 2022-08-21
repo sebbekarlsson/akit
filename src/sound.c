@@ -1,53 +1,62 @@
+#include <akit/macros.h>
 #include <akit/sound.h>
 #include <akit/utils.h>
-#include <akit/macros.h>
 
+static float safediv(float a, float b) {
+  if (ceilf(fabsf(b)) == 0.0f)
+    b = 1.0f;
+  return a / b;
+}
 
-void akit_sound_compute_gain(AkitSound sound, AkitListener listener, float* left_gain, float* right_gain) {
+void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
+                             float *left_gain, float *right_gain) {
   float left = 0.0f;
   float right = 0.0f;
+  float center = 0.0f;
 
   float far = OR(listener.far, 400.0f);
+  Vector3 forward = vector3_unit(listener.forward);
 
-  Vector3 left_dir = vector3_scale(vector3_unit(vector3_cross(listener.forward, listener.up)), -1);
-  Vector3 right_dir = vector3_scale(left_dir, -1);
+  float dist = fabsf(vector3_distance3d(listener.position, sound.position)) / far;
+  float inv_dist = safediv(1.0f, dist);
 
+  Vector3 left_right = vector3_unit(vector3_cross(forward, listener.up));
+  Vector3 left_dir = vector3_scale(left_right, -1);
+  Vector3 right_dir = vector3_scale(left_right, 1);
+  Vector3 sound_dir =
+      vector3_unit(vector3_sub(sound.position, listener.position));
 
-  printf("Listener:\n");
-  printf("Position: ");
-  VEC3_PRINT(listener.position); printf("\n");
+  left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, 0.33f));
+  right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, 0.33f));
 
-  float distance = fabsf(vector3_distance3d(sound.position, listener.position)) / far;
-  if (distance <= 0.0f) distance = 1.0f;
-
-  float dot_forward = vector3_dot(sound.position, listener.forward);
-  float dot_left = vector3_dot(sound.position, left_dir) / (M_PI*2.0f);
-  float dot_right = vector3_dot(sound.position, right_dir) / (M_PI*2.0f);
-
-
-  left = fmaxf(0.0f, 1.0f - dot_left);
-  right = fmaxf(0.0f, 1.0f - dot_right);
+  float left_dot = vector3_dot(left_dir, sound_dir);
+  float right_dot = vector3_dot(right_dir, sound_dir);
 
 
-  left = (left*left) / (distance*distance);
-  right = (right*right) / (distance*distance);
+  left = left_dot * inv_dist;
+  right = right_dot * inv_dist;
 
+  left += inv_dist * 0.5f;
+  right += inv_dist * 0.5f;
 
   left = akit_clamp(left, 0.0f, 1.0f);
   right = akit_clamp(right, 0.0f, 1.0f);
 
-  printf("Left gain: %12.6f, right gain: %12.6f\n", left, right);
+  if (left < 0 || isnan(left) || isinf(left))
+    left = 0.0f;
+  if (right < 0 || isnan(right) || isinf(right))
+    right = 0.0f;
 
   *left_gain = left;
   *right_gain = right;
 }
 
-void akit_sound_clip_destroy(AkitSoundClip* clip) {
+void akit_sound_clip_destroy(AkitSoundClip *clip) {
   clip->sound.data = 0;
-//  if (clip->sound.data != 0) {
-//    free(clip->sound.data);
-//    clip->sound.data = 0;
-//  }
+  //  if (clip->sound.data != 0) {
+  //    free(clip->sound.data);
+  //    clip->sound.data = 0;
+  //  }
 
   clip->cursor = 0;
   clip->frame = 0;

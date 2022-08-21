@@ -13,3 +13,8 @@ float akit_random_range(float min, float max) {
   float scale = rand() / (float)RAND_MAX;
   return akit_clamp(min + scale * (max - min), min, max);
 }
+
+
+float akit_lerp(float from, float to, float scale) {
+  return from + (to - from) * scale;
+}
