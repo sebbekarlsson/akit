@@ -12,6 +12,7 @@ typedef struct {
   double duration;
   int64_t channels;
   int64_t block_align;
+  float gain;
 } AkitSound;
 
 

@@ -1,6 +1,7 @@
 #include <akit/engine.h>
 #include <akit/macros.h>
 #include <akit/constants.h>
+#include <akit/utils.h>
 #include <string.h>
 
 
@@ -53,6 +54,10 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   if (engine->stopped) return 0;
   if (sound.data == 0) return 0;
   if (sound.length == 0) return 0;
+  if (sound.gain <= 0.0f) {
+    fprintf(stderr, "(Akit): No use in pushing a sound with no gain. Will not push.\n");
+      return 0;
+  }
 
 
   pthread_mutex_trylock(&engine->process_lock);
@@ -70,6 +75,7 @@ int akit_engine_push_sound(AkitEngine* engine, AkitSound sound) {
   clip->cursor = 0;
   clip->time_pushed = 0;
   clip->sound = sound;
+  clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
 
 
   pthread_mutex_trylock(&engine->process_lock);

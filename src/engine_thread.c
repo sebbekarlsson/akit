@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <akit/utils.h>
 
-#define AKIT_SAMPLE_TOLERANCE 1.001f
+#define AKIT_SAMPLE_TOLERANCE 1.9f
 #define AKIT_SILENCE 0.000001f
 
 
@@ -21,7 +21,7 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
   int64_t clip_length = clip->sound.length;
   int64_t clip_channels = OR(clip->sound.channels, 1);
 
-  if (clip->time >= clip->sound.duration || clip->cursor >= (clip_length)) {
+  if (clip->time >= clip->sound.duration || (clip->cursor + length) >= (clip_length)) {
     clip->finished = true;
     return;
   }
@@ -44,6 +44,10 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
   if (clip_channels >= 2) {
     for (int64_t i = 0; i < length; i++) {
+      if (clip->cursor + (i*2) >= (clip_length / sizeof(float))) {
+        clip->finished = true;
+        break;
+      }
 
       float *out_left = &buffer[i * 2];
       float *out_right = &buffer[1 + i * 2];
@@ -80,8 +84,14 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
   }
 
   clip->cursor += length * clip_channels;
- // clip->frame += length;
-  clip->time += time_unit;
+
+  int64_t divisor = clip_channels <= 1 ? 1 : 2;
+
+  clip->time =  (1.0f / sample_rate) * (clip->cursor / divisor);
+
+  if (clip->time >= clip->sound.duration || (clip->cursor) >= (clip_length)) {
+    clip->finished = true;
+  }
 }
 
 void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
@@ -136,7 +146,7 @@ void *akit_engine_thread(void *ptr) {
   int64_t frame_length = akit_engine_get_frame_length(engine);
   int64_t tape_length = sample_rate * 4;//frame_length * channels *
                         //2; // sample_rate * 4;//rame_length * channels * 4;
-  float time_unit = (1.0f / (float)sample_rate) * (float)frame_length;
+  float time_unit =  (float)(frame_length) / (float)(sample_rate);
 
   printf("Engine info:\n");
   printf("sample_rate: %12.6f\n", sample_rate);
@@ -179,18 +189,13 @@ void *akit_engine_thread(void *ptr) {
                         engine->time, engine->frame);
     pthread_mutex_unlock(&engine->push_lock);
 
+
     akit_driver_buffer_data(&engine->driver, &engine->tape[engine->frame],
                             frame_length);
 
- //   printf("Avail: %ld\n", avail / 2);
     engine->frame += frame_length * channels;
     engine->time += time_unit;
-    akit_msleep(time_unit * 1000);
-
-
-//    engine->listener.position = vector3_add(engine->listener.position, VEC3(0.0f, 0, -0.5f));
- //   engine->listener.forward = VEC3(cosf(engine->time*M_PI), 0, sinf(engine->time*M_PI));
-
+    akit_msleep(time_unit*1000);
 
     if (engine->stopped || !engine->running) {
       akit_driver_destroy(&engine->driver);

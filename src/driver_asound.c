@@ -66,8 +66,12 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   uint64_t min_period = driver->config.frame_length;
   snd_pcm_hw_params_set_period_size(asound->pcm_handle, asound->params, min_period, 0);
-  snd_pcm_hw_params_set_period_size_max(asound->pcm_handle, asound->params, &min_period, 0);
-  driver->info.frame_length = min_period;
+ // snd_pcm_hw_params_set_period_size_max(asound->pcm_handle, asound->params, &min_period, 0);
+  driver->info.frame_length = driver->config.frame_length;
+
+  uint64_t asound_period = 0;
+  snd_pcm_hw_params_get_period_size(asound->params, &asound_period, 0);
+  printf("Asound gave us period: %ld\n", asound_period);
 
 
     snd_pcm_sw_params_set_avail_min(asound->pcm_handle, asound->sw_params, min_period);
@@ -146,8 +150,8 @@ int akit_driver_asound_buffer_data(AkitDriver *driver, float *buffer,
   int err = 0;
 
   if ((err = snd_pcm_writei(asound->pcm_handle, buffer, length)) < 0) {
-    fprintf(stderr, "XRUN.\n");
-    snd_pcm_recover(asound->pcm_handle, err, 0);
+    //fprintf(stderr, "XRUN.\n");
+    snd_pcm_recover(asound->pcm_handle, err, 1);
     //snd_pcm_prepare(asound->pcm_handle);
     return 0;
   }

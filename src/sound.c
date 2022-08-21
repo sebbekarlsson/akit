@@ -14,7 +14,7 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
   float right = 0.0f;
   float center = 0.0f;
 
-  float far = OR(listener.far, 400.0f);
+  float far = OR(listener.far, 2.0f);
   Vector3 forward = vector3_unit(listener.forward);
 
   float dist = fabsf(vector3_distance3d(listener.position, sound.position)) / far;
@@ -36,11 +36,11 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
   left = left_dot * inv_dist;
   right = right_dot * inv_dist;
 
-  left += inv_dist * 0.5f;
-  right += inv_dist * 0.5f;
+  left += inv_dist * 0.33f;
+  right += inv_dist * 0.33f;
 
-  left = akit_clamp(left, 0.0f, 1.0f);
-  right = akit_clamp(right, 0.0f, 1.0f);
+  left = akit_clamp(left * sound.gain, 0.0f, 1.0f);
+  right = akit_clamp(right * sound.gain, 0.0f, 1.0f);
 
   if (left < 0 || isnan(left) || isinf(left))
     left = 0.0f;
