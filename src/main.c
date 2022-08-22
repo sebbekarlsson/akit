@@ -1,10 +1,13 @@
 #include <akit/engine.h>
 #include <akit/sleep.h>
+#include <akit/dsp.h>
+#include <akit/utils.h>
 #include <stdio.h>
 #include <waves/wav.h>
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
+
 
   Wave wav = {0};
   WaveOptions wav_options = {0};

@@ -1,21 +1,11 @@
 #include <akit/engine.h>
+#include <akit/constants.h>
 #include <akit/macros.h>
 #include <akit/sleep.h>
 #include <akit/utils.h>
+#include <akit/dsp.h>
 #include <stdio.h>
 
-#define AKIT_SAMPLE_TOLERANCE 1.9f
-#define AKIT_SILENCE 0.000001f
-
-static float fix_sample(float sample) {
-  if (isinf(sample) || isnan(sample))
-    return AKIT_SILENCE;
-  if (sample < -AKIT_SAMPLE_TOLERANCE)
-    return AKIT_SILENCE;
-  if (sample > AKIT_SAMPLE_TOLERANCE)
-    return AKIT_SILENCE;
-  return sample;
-}
 
 void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
                               float *buffer, int64_t length, double time,
@@ -41,6 +31,9 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
   akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
 
+
+//  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) - clip->cursor);
+
   if (clip_channels >= 2) {
     for (int64_t i = 0; i < length; i++) {
       if (clip->cursor + (i * 2) >= (clip_length / sizeof(float))) {
@@ -54,14 +47,15 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
       float in_left = clip_buffer[i * 2];
       float in_right = clip_buffer[1 + i * 2];
 
-      *out_left += in_left * left_gain;
-      *out_right += in_right * right_gain;
+      *out_left += (in_left * left_gain);
+      *out_right += (in_right * right_gain);
 
-      *out_left = fix_sample(*out_left);
-      *out_right = fix_sample(*out_right);
+      *out_left = akit_dsp_get_corrected_sample(*out_left);
+      *out_right = akit_dsp_get_corrected_sample(*out_right);
     }
 
   } else {
+
     for (int64_t i = 0; i < length; i++) {
       if (clip->cursor + i >= (clip_length / sizeof(float))) {
         clip->finished = true;
@@ -71,14 +65,14 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
       float *out_left = &buffer[i * 2];
       float *out_right = &buffer[1 + i * 2];
 
-      float in_left = clip_buffer[i];
-      float in_right = clip_buffer[i];
+      float sample = clip_buffer[i];
 
-      *out_left += in_left * left_gain;
-      *out_right += in_right * right_gain;
+      *out_left += (sample * left_gain);
+      *out_right += (sample * right_gain);
 
-      *out_left = fix_sample(*out_left);
-      *out_right = fix_sample(*out_right);
+      *out_left = akit_dsp_get_corrected_sample(*out_left);
+      *out_right = akit_dsp_get_corrected_sample(*out_right);
+
     }
   }
 
@@ -154,7 +148,7 @@ void *akit_engine_thread(void *ptr) {
   printf("frame_length: %ld\n", frame_length);
   printf("tape_length: %ld\n", tape_length);
 
-  engine->tape = (float *)calloc(tape_length * 3, sizeof(float));
+  engine->tape = (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
 
   akit_msleep(2000);
 
@@ -163,16 +157,16 @@ void *akit_engine_thread(void *ptr) {
     if (engine->frame + (frame_length * channels) >= tape_length) {
       engine->frame = 0;
       akit_engine_clear_tape(engine);
-      engine->tape = (float *)calloc(tape_length * 3, sizeof(float));
-      akit_msleep(time_unit * 1000);
+      akit_msleep(time_unit * 60);
     }
 
     pthread_mutex_lock(&engine->push_lock);
     akit_engine_clear_sounds(engine);
 
     if (akit_array_is_empty(&engine->clips)) {
+      akit_engine_clear_tape(engine);
       akit_driver_prepare(&engine->driver);
-      akit_msleep(time_unit * 1000);
+      akit_msleep(time_unit * 60);
     }
 
     pthread_mutex_unlock(&engine->push_lock);

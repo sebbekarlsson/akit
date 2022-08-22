@@ -52,6 +52,8 @@ int64_t akit_engine_get_frame_length(AkitEngine* engine);
 
 int64_t akit_engine_get_channels(AkitEngine* engine);
 
+int64_t akit_engine_get_tape_length(AkitEngine* engine);
+
 int akit_engine_clear_tape(AkitEngine* engine);
 
 int akit_engine_set_listener(AkitEngine* engine, AkitListener listener);

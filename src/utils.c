@@ -16,3 +16,7 @@ float akit_random_range(float min, float max) {
 float akit_lerp(float from, float to, float scale) {
   return from + (to - from) * scale;
 }
+
+float akit_sign(float v) {
+  return v < 0 ? -1 : 1;
+}

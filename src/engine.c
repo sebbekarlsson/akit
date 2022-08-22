@@ -102,6 +102,10 @@ int64_t akit_engine_get_frame_length(AkitEngine *engine) {
             OR(engine->config.driver_config.frame_length, AKIT_FRAME_LENGTH));
 }
 
+int64_t akit_engine_get_tape_length(AkitEngine* engine) {
+  return akit_engine_get_sample_rate(engine) * 4;
+}
+
 int64_t akit_engine_get_channels(AkitEngine *engine) {
   return OR(engine->driver.info.channels, AKIT_CHANNELS);
 }
@@ -112,8 +116,9 @@ int akit_engine_clear_tape(AkitEngine *engine) {
   if (!engine->tape)
     return 0;
 
-  free(engine->tape);
-  engine->tape = 0;
+  int64_t length = akit_engine_get_tape_length(engine) * AKIT_TAPE_LENGTH_MULTIPLIER;
+
+  memset(&engine->tape[0], 0, length * sizeof(float));
 
   return 1;
 }
