@@ -20,7 +20,7 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   if ((asound->pcm =
            snd_pcm_open(&asound->pcm_handle, AKIT_DRIVER_ASOUND_PCM_DEVICE,
-                        SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC)) < 0)
+                        SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) < 0)
     fprintf(stderr, "ERROR: Can't open \"%s\" PCM device. %s\n",
             AKIT_DRIVER_ASOUND_PCM_DEVICE, snd_strerror(asound->pcm));
 
@@ -191,7 +191,6 @@ int akit_driver_asound_flush(AkitDriver *driver) {
 
 
   //  snd_pcm_prepare(asound->pcm_handle);
-  //snd_pcm_nonblock(asound->pcm_handle, 1);
 
   //return 1;
 }
@@ -223,6 +222,7 @@ int akit_driver_asound_reset(AkitDriver* driver) {
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
 
   snd_pcm_reset(asound->pcm_handle);
+  snd_pcm_nonblock(asound->pcm_handle, 1);
 
   return 1;
 }
