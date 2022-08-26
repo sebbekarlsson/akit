@@ -78,6 +78,8 @@ int akit_driver_asound_setup(AkitDriver *driver) {
     fprintf(stderr, "ERROR: Can't set start threshold.\n");
   }
 
+  snd_pcm_sw_params_set_xrun_mode(asound->pcm_handle, asound->sw_params, SND_PCM_XRUN_NONE);
+
   if ((asound->pcm = snd_pcm_sw_params(asound->pcm_handle, asound->sw_params)) <
       0) {
     fprintf(stderr, "ERROR: Can't set sw params.\n");
@@ -100,6 +102,7 @@ int akit_driver_asound_setup(AkitDriver *driver) {
   snd_pcm_hw_params_get_rate(asound->params, &tmp, 0);
   driver->info.sample_rate = tmp;
   sample_rate = tmp;
+
 
   // snd_pcm_hw_params_get_period_time(asound->params, &tmp, NULL);
 
@@ -137,8 +140,8 @@ int akit_driver_asound_buffer_data(AkitDriver *driver, float *buffer,
 
   if ((err = snd_pcm_writei(asound->pcm_handle, buffer, length)) < 0) {
     // fprintf(stderr, "XRUN.\n");
-    snd_pcm_recover(asound->pcm_handle, err, 1);
-    // snd_pcm_prepare(asound->pcm_handle);
+    //snd_pcm_recover(asound->pcm_handle, err, 1);
+    snd_pcm_prepare(asound->pcm_handle);
     return 0;
   }
 
@@ -228,5 +231,19 @@ int akit_driver_asound_reset(AkitDriver* driver) {
   //snd_pcm_resume(asound->pcm_handle);
   snd_pcm_nonblock(asound->pcm_handle, 1);
 
+  return 1;
+}
+
+int akit_driver_asound_wait(AkitDriver* driver, int timeout) {
+      if (!driver->driver)
+    return 0;
+  if (driver->type != AKIT_DRIVER_TYPE_ASOUND)
+    return 0;
+  if (!driver->initialized)
+    return 0;
+
+  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+
+  snd_pcm_wait(asound->pcm_handle, timeout);
   return 1;
 }
