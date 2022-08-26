@@ -157,7 +157,7 @@ void *akit_engine_thread(void *ptr) {
     if (engine->frame + (frame_length * channels) >= tape_length) {
       engine->frame = 0;
       akit_engine_clear_tape(engine);
-      akit_msleep(ceilf(time_unit * 60));
+     // akit_msleep(ceilf(time_unit * 60));
     }
 
     pthread_mutex_lock(&engine->push_lock);
@@ -168,11 +168,11 @@ void *akit_engine_thread(void *ptr) {
       akit_engine_clear_tape(engine);
       akit_driver_prepare(&engine->driver);
       akit_driver_flush(&engine->driver);
-      akit_msleep(ceilf(time_unit * 60));
+    //  akit_msleep(ceilf(time_unit * 60));
     }
 
-    if (!engine->tape)
-      continue;
+   // if (!engine->tape)
+   //   continue;
 
     akit_driver_flush(&engine->driver);
 
