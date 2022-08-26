@@ -166,10 +166,11 @@ void *akit_engine_thread(void *ptr) {
     if (akit_array_is_empty(&engine->clips)) {
       akit_engine_clear_tape(engine);
       akit_driver_prepare(&engine->driver);
-      akit_msleep(time_unit * 60);
+      pthread_mutex_unlock(&engine->push_lock);
+      akit_msleep(time_unit * 500);
+    } else {
+      pthread_mutex_unlock(&engine->push_lock);
     }
-
-    pthread_mutex_unlock(&engine->push_lock);
 
     if (!engine->tape)
       continue;

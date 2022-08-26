@@ -11,6 +11,7 @@
 
 typedef struct {
   AkitDriverConfig driver_config;
+  int64_t max_sounds;
 } AkitEngineConfig;
 
 typedef struct {
@@ -61,5 +62,7 @@ int akit_engine_set_listener(AkitEngine* engine, AkitListener listener);
 int akit_engine_clear_sounds(AkitEngine* engine);
 
 AkitListener akit_engine_get_listener(AkitEngine engine);
+
+int64_t akit_engine_get_sound_limit(AkitEngine engine);
 
 #endif
