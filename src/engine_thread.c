@@ -161,22 +161,24 @@ void *akit_engine_thread(void *ptr) {
      // akit_msleep(ceilf(time_unit * 60));
     }
 
-    pthread_mutex_lock(&engine->push_lock);
-    akit_engine_clear_sounds(engine);
-    pthread_mutex_unlock(&engine->push_lock);
+
 
     if (akit_array_is_empty(&engine->clips)) {
       akit_engine_clear_tape(engine);
-      akit_driver_reset(&engine->driver);
+  //    akit_driver_reset(&engine->driver);
       //akit_driver_prepare(&engine->driver);
      // akit_driver_flush(&engine->driver);
     //  akit_msleep(ceilf(time_unit * 60));
+    } else {
+      pthread_mutex_lock(&engine->push_lock);
+      akit_engine_clear_sounds(engine);
+      pthread_mutex_unlock(&engine->push_lock);
     }
 
    // if (!engine->tape)
    //   continue;
 
-    akit_driver_flush(&engine->driver);
+    //akit_driver_flush(&engine->driver);
 
     pthread_mutex_lock(&engine->push_lock);
     akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
