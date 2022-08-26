@@ -103,3 +103,17 @@ int64_t akit_driver_get_avail(AkitDriver *driver) {
   assert(0 && "Not reached");
   return 0;
 }
+
+int akit_driver_reset(AkitDriver* driver) {
+    switch (driver->type) {
+  case AKIT_DRIVER_TYPE_ASOUND:
+    return akit_driver_asound_reset(driver);
+    break;
+  case AKIT_DRIVER_TYPE_JACK:
+    return akit_driver_jack_reset(driver);
+    break;
+  }
+
+  assert(0 && "Not reached");
+  return 0;
+}

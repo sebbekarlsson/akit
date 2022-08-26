@@ -166,8 +166,9 @@ void *akit_engine_thread(void *ptr) {
 
     if (akit_array_is_empty(&engine->clips)) {
       akit_engine_clear_tape(engine);
-      akit_driver_prepare(&engine->driver);
-      akit_driver_flush(&engine->driver);
+      akit_driver_reset(&engine->driver);
+      //akit_driver_prepare(&engine->driver);
+     // akit_driver_flush(&engine->driver);
     //  akit_msleep(ceilf(time_unit * 60));
     }
 

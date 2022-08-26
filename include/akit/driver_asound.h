@@ -17,6 +17,7 @@ int akit_driver_asound_buffer_data(AkitDriver* driver, float* buffer, int64_t le
 
 int akit_driver_asound_flush(AkitDriver* driver);
 int akit_driver_asound_prepare(AkitDriver* driver);
+int akit_driver_asound_reset(AkitDriver* driver);
 
 int64_t akit_driver_asound_get_avail(AkitDriver* driver);
 

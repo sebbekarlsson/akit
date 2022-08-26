@@ -27,6 +27,11 @@ int akit_driver_jack_prepare(AkitDriver* driver) {
   return 0;
 }
 
+int akit_driver_jack_reset(AkitDriver* driver) {
+  fprintf(stderr, "JACK is not implemented.\n");
+  return 0;
+}
+
 int64_t akit_driver_jack_get_avail(AkitDriver* driver) {
   fprintf(stderr, "JACK is not implemented.\n");
   return 0;

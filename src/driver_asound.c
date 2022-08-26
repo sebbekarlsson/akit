@@ -186,12 +186,14 @@ int akit_driver_asound_flush(AkitDriver *driver) {
   if (!driver->initialized)
     return 0;
 
-  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+  return akit_driver_asound_reset(driver);
+ // AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+
 
   //  snd_pcm_prepare(asound->pcm_handle);
   //snd_pcm_nonblock(asound->pcm_handle, 1);
 
-  return 1;
+  //return 1;
 }
 
 int64_t akit_driver_asound_get_avail(AkitDriver *driver) {
@@ -208,4 +210,19 @@ int64_t akit_driver_asound_get_avail(AkitDriver *driver) {
   avail = snd_pcm_avail_update(asound->pcm_handle);
 
   return (int64_t)avail;
+}
+
+int akit_driver_asound_reset(AkitDriver* driver) {
+    if (!driver->driver)
+    return 0;
+  if (driver->type != AKIT_DRIVER_TYPE_ASOUND)
+    return 0;
+  if (!driver->initialized)
+    return 0;
+
+  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+
+  snd_pcm_reset(asound->pcm_handle);
+
+  return 1;
 }
