@@ -137,8 +137,7 @@ void *akit_engine_thread(void *ptr) {
   float sample_rate = akit_engine_get_sample_rate(engine);
   int64_t channels = akit_engine_get_channels(engine);
   int64_t frame_length = akit_engine_get_frame_length(engine);
-  int64_t tape_length =
-      sample_rate * 4; // frame_length * channels *
+  int64_t tape_length = akit_engine_get_tape_length(engine); // frame_length * channels *
                        // 2; // sample_rate * 4;//rame_length * channels * 4;
   float time_unit = (float)(frame_length) / (float)(sample_rate);
 
@@ -158,8 +157,7 @@ void *akit_engine_thread(void *ptr) {
       engine->frame = 0;
       akit_engine_clear_tape(engine);
       akit_driver_reset(&engine->driver);
-     // akit_driver_reset(&engine->driver);
-     // akit_msleep(ceilf(time_unit * 60));
+      akit_driver_wait(&engine->driver, 10);
     }
 
 
@@ -167,9 +165,6 @@ void *akit_engine_thread(void *ptr) {
     if (akit_array_is_empty(&engine->clips)) {
       akit_engine_clear_tape(engine);
       akit_driver_reset(&engine->driver);
-  //    akit_driver_reset(&engine->driver);
-      //akit_driver_prepare(&engine->driver);
-     // akit_driver_flush(&engine->driver);
       akit_msleep(ceilf(time_unit * 60));
     } else {
       pthread_mutex_lock(&engine->push_lock);
@@ -181,6 +176,9 @@ void *akit_engine_thread(void *ptr) {
    //   continue;
 
     //akit_driver_flush(&engine->driver);
+
+
+    akit_driver_wait(&engine->driver, 10);
 
     pthread_mutex_lock(&engine->push_lock);
     akit_engine_process(engine, &engine->tape[engine->frame], frame_length,

@@ -106,7 +106,7 @@ int64_t akit_engine_get_frame_length(AkitEngine *engine) {
 }
 
 int64_t akit_engine_get_tape_length(AkitEngine* engine) {
-  return akit_engine_get_sample_rate(engine) * 4;
+  return akit_engine_get_sample_rate(engine) * 6;
 }
 
 int64_t akit_engine_get_channels(AkitEngine *engine) {
