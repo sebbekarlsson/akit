@@ -37,6 +37,10 @@ int main(int argc, char *argv[]) {
 
   akit_msleep(1000);
 
+  AkitWorldInfo world_info = {0};
+  world_info.size = VEC3(128, 128, 128);
+  world_info.roughness = 0.5f;
+
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
     .length = wav.length,
@@ -45,7 +49,8 @@ int main(int argc, char *argv[]) {
     .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
-    .gain = 0.5f
+    .gain = 0.5f,
+    .world_info = world_info
   });
 
   akit_msleep(3000);
@@ -59,7 +64,8 @@ int main(int argc, char *argv[]) {
     .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
-    .gain = 1.0f
+    .gain = 1.0f,
+    .world_info = world_info
   });
 
 

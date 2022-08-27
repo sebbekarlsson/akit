@@ -72,10 +72,12 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
 
   int64_t max_sounds = akit_engine_get_sound_limit(*engine);
 
-  if (engine->clips.length >= max_sounds) {
-    fprintf(stderr, "(Akit): Sound buffer is full, please try again later.\n");
-    pthread_mutex_unlock(&engine->process_lock);
-    return 0;
+  if (!sound.ignore_full) {
+    if (engine->clips.length >= max_sounds) {
+      fprintf(stderr, "(Akit): Sound buffer is full, please try again later.\n");
+      pthread_mutex_unlock(&engine->process_lock);
+      return 0;
+    }
   }
   pthread_mutex_unlock(&engine->process_lock);
 
@@ -84,7 +86,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
 
   AkitSoundClip *clip = NEW(AkitSoundClip);
   clip->finished = false;
-  clip->cursor = 0;
+  clip->cursor = clip->sound.cursor_start;
   clip->time_pushed = 0;
   clip->sound = sound;
   clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);

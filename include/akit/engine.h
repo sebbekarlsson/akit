@@ -28,6 +28,7 @@ typedef struct {
   AkitArray clips;
 
   float* tape;
+  float* tape_fx;
 
   pthread_t thread_id;
   pthread_mutex_t push_lock;
