@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     .length = wav.length,
     .sample_rate = wav.header.sample_rate,
     .position = VEC3(0.0f, 0, 1.0f),
-    .duration = fmaxf(wav.duration, 0.5f),
+    .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .gain = 0.5f
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     .length = wav.length,
     .sample_rate = wav.header.sample_rate,
     .position = VEC3(16.0f, 0.0f, 1.0f),
-    .duration = fmaxf(wav.duration, 0.5f),
+    .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .gain = 1.0f

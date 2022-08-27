@@ -1,11 +1,13 @@
-#include <akit/engine.h>
 #include <akit/constants.h>
+#include <akit/dsp.h>
+#include <akit/engine.h>
 #include <akit/macros.h>
 #include <akit/sleep.h>
 #include <akit/utils.h>
-#include <akit/dsp.h>
 #include <stdio.h>
-
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 
 void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
                               float *buffer, int64_t length, double time,
@@ -13,20 +15,14 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
   int64_t clip_length = clip->sound.length;
   int64_t clip_channels = OR(clip->sound.channels, 1);
 
-  if (clip->time >= clip->sound.duration ||
+  if (clip->time >= (clip->sound.duration * 2) ||
       (clip->cursor + length) >= (clip_length)) {
     clip->finished = true;
     return;
   }
 
-
-
-
   float sample_rate =
-    OR(clip->sound.sample_rate, akit_engine_get_sample_rate(engine));
-
-
-
+      OR(clip->sound.sample_rate, akit_engine_get_sample_rate(engine));
 
   float *clip_buffer = &clip->sound.data[clip->cursor];
 
@@ -37,8 +33,8 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
   akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
 
-
-//  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) - clip->cursor);
+  //  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) -
+  //  clip->cursor);
 
   if (clip_channels >= 2) {
     for (int64_t i = 0; i < length; i++) {
@@ -78,7 +74,6 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
       *out_left = akit_dsp_get_corrected_sample(*out_left);
       *out_right = akit_dsp_get_corrected_sample(*out_right);
-
     }
   }
 
@@ -86,9 +81,10 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
   int64_t divisor = clip_channels <= 1 ? 1 : 2;
 
-  clip->time = (1.0f / sample_rate) * (clip->cursor / divisor);
+  clip->time = (1.0f / sample_rate) * ((double)clip->cursor / (double)divisor);
 
-  if (clip->time >= clip->sound.duration || (clip->cursor) >= (clip_length)) {
+  if (clip->time >= (clip->sound.duration * 2) ||
+      (clip->cursor) >= (clip_length)) {
     clip->finished = true;
   }
 }
@@ -143,8 +139,9 @@ void *akit_engine_thread(void *ptr) {
   float sample_rate = akit_engine_get_sample_rate(engine);
   int64_t channels = akit_engine_get_channels(engine);
   int64_t frame_length = akit_engine_get_frame_length(engine);
-  int64_t tape_length = akit_engine_get_tape_length(engine); // frame_length * channels *
-                       // 2; // sample_rate * 4;//rame_length * channels * 4;
+  int64_t tape_length = akit_engine_get_tape_length(
+      engine); // frame_length * channels *
+               // 2; // sample_rate * 4;//rame_length * channels * 4;
   float time_unit = (float)(frame_length) / (float)(sample_rate);
 
   printf("Engine info:\n");
@@ -153,58 +150,65 @@ void *akit_engine_thread(void *ptr) {
   printf("frame_length: %ld\n", frame_length);
   printf("tape_length: %ld\n", tape_length);
 
-  engine->tape = (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
+  engine->tape =
+      (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
 
-  akit_msleep(2000);
+  akit_msleep(1);
+  double wanted_delay = time_unit * 1000;
 
   while (true) {
 
-
     if (akit_array_is_empty(&engine->clips)) {
+      akit_msleep(wanted_delay);
       akit_engine_clear_tape(engine);
-     // akit_driver_reset(&engine->driver);
-      akit_msleep(ceilf(time_unit * 60));
+      akit_driver_flush(&engine->driver);
+      akit_driver_reset(&engine->driver);
+      // akit_driver_wait(&engine->driver, 10);
     } else {
       pthread_mutex_lock(&engine->push_lock);
       akit_engine_clear_sounds(engine);
       pthread_mutex_unlock(&engine->push_lock);
     }
 
-   // if (!engine->tape)
-   //   continue;
-
-
-
+    // if (!engine->tape)
+    //   continue;
 
     pthread_mutex_lock(&engine->push_lock);
     akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
                         engine->time, engine->frame);
     pthread_mutex_unlock(&engine->push_lock);
 
+    // akit_driver_wait(&engine->driver, 1000);
+
+    akit_driver_wait(&engine->driver, 60);
     akit_driver_buffer_data(&engine->driver, &engine->tape[engine->frame],
                             frame_length);
 
+    // akit_delay(time_unit * 500);
 
-
-    akit_msleep(time_unit * 1000);
+    double delay =
+        (double)akit_driver_get_delay(&engine->driver) / (double)sample_rate;
+    double got_delay = ((delay * 1000.0f) / 60.0f) * 2;
+    akit_msleep(fmax(got_delay, wanted_delay));
 
     engine->time += time_unit;
 
     if (engine->frame + (frame_length * channels) >= (tape_length)) {
-      int64_t delay = akit_driver_get_delay(&engine->driver);
       engine->frame = 0;
+      engine->time = 0;
 
       akit_engine_clear_tape(engine);
 
-      if (delay >= ((frame_length/2)*60)) {
+      if (got_delay > wanted_delay) {
         akit_driver_flush(&engine->driver);
         akit_driver_reset(&engine->driver);
       }
-     } else {
-       engine->frame += frame_length * channels;
-     }
 
-    //akit_driver_wait(&engine->driver, 1);
+    } else {
+      engine->frame += frame_length * channels;
+    }
+
+    // akit_driver_wait(&engine->driver, 1);
 
     if (engine->stopped || !engine->running) {
       akit_driver_destroy(&engine->driver);

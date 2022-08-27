@@ -26,6 +26,14 @@ if (NOT TARGET vec3_static)
   FetchContent_MakeAvailable(vec3_static)
 endif()
 
+if (NOT TARGET date_static)
+  FetchContent_Declare(
+    date_static
+    URL /home/ianertson/workspace/date
+    )
+  FetchContent_MakeAvailable(date_static)
+endif()
+
 if (NOT TARGET hashmap_static)
   FetchContent_Declare(
     hashmap_static
@@ -51,6 +59,7 @@ function (akit_init TARGET_NAME)
     vec3_static
     hashmap_static
     waves_static
+    date_static
     cglm
     asound
     pthread

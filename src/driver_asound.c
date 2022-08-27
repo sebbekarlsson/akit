@@ -42,7 +42,7 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   if ((asound->pcm =
            snd_pcm_hw_params_set_access(asound->pcm_handle, asound->params,
-                                        SND_PCM_ACCESS_RW_INTERLEAVED)) < 0)
+                                        SND_PCM_ACCESS_RW_NONINTERLEAVED)) < 0)
     fprintf(stderr, "ERROR: Can't set interleaved mode. %s\n",
             snd_strerror(asound->pcm));
   if ((asound->pcm =
@@ -61,7 +61,7 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   uint64_t min_period = driver->config.frame_length;
   snd_pcm_hw_params_set_period_size(asound->pcm_handle, asound->params,
-                                    min_period, 0);
+                                    min_period * sizeof(float), 0);
   // snd_pcm_hw_params_set_period_size_max(asound->pcm_handle, asound->params,
   // &min_period, 0);
   driver->info.frame_length = driver->config.frame_length;
@@ -70,8 +70,8 @@ int akit_driver_asound_setup(AkitDriver *driver) {
   snd_pcm_hw_params_get_period_size(asound->params, &asound_period, 0);
   printf("Asound gave us period: %ld\n", asound_period);
 
-  snd_pcm_sw_params_set_avail_min(asound->pcm_handle, asound->sw_params,
-                                  min_period);
+  //snd_pcm_sw_params_set_avail_min(asound->pcm_handle, asound->sw_params,
+    //                              min_period);
 
   if (snd_pcm_sw_params_set_start_threshold(
           asound->pcm_handle, asound->sw_params, min_period) < 0) {
@@ -116,6 +116,8 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   driver->driver = asound;
   driver->initialized = true;
+
+  printf("AVAIL: %ld\n", akit_driver_asound_get_avail(driver));
 
   return 1;
 }
@@ -240,7 +242,10 @@ int akit_driver_asound_wait(AkitDriver* driver, int timeout) {
 
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
 
+//  while (snd_pcm_state(asound->pcm_handle) != SND_PCM_STATE_PREPARED) {
   snd_pcm_wait(asound->pcm_handle, timeout);
+  //akit_msleep(1);
+ // }
   return 1;
 }
 

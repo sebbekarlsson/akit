@@ -1,4 +1,5 @@
 #include <akit/sleep.h>
+#include <date/date.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
@@ -20,4 +21,18 @@ int akit_msleep(long msec) {
   } while (res && errno == EINTR);
 
   return res;
+}
+
+void __attribute__((optimize("O0"))) akit_delay(double d) {
+  Date start = date_now();
+
+  while (1) {
+    Date now = date_now();
+
+    Date diff = date_diff(&now, &start);
+
+    // printf("%12.6f\n", diff.milliseconds_static);
+    if (diff.milliseconds_static >= d)
+      return;
+  }
 }
