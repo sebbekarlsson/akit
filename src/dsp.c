@@ -30,3 +30,19 @@ float akit_dsp_get_corrected_sample(
 
   return akit_clamp(sample, -AKIT_DSP_SAMPLE_TARGET, AKIT_DSP_SAMPLE_TARGET);
 }
+
+void akit_dsp_process(AkitEngine* engine, float* left, float* right) {
+  float L = *left;
+  float R = *right;
+  if (engine->config.normalize_stereo) {
+    float avg = (L+R) / 2.0f;
+
+    L = avg;
+    R = avg;
+  }
+
+
+
+  *left = L;
+  *right = L;
+}

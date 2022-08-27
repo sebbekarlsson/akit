@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   config.type = AKIT_DRIVER_TYPE_ASOUND;
 
   AkitEngine engine = {0};
-  akit_engine_init(&engine, (AkitEngineConfig){ .driver_config = config, .max_sounds = 10 });
+  akit_engine_init(&engine, (AkitEngineConfig){ .driver_config = config, .max_sounds = 10, .normalize_stereo = true });
   akit_engine_set_listener(&engine, (AkitListener){
     .forward = VEC3(0, 0, 1),
     .up = VEC3(0, 1, 0),

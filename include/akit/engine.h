@@ -12,6 +12,7 @@
 typedef struct {
   AkitDriverConfig driver_config;
   int64_t max_sounds;
+  bool normalize_stereo;
 } AkitEngineConfig;
 
 typedef struct {

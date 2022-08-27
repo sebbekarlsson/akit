@@ -49,6 +49,8 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
       float in_left = clip_buffer[i * 2];
       float in_right = clip_buffer[1 + i * 2];
 
+      akit_dsp_process(engine, &in_left, &in_right);
+
       *out_left += (in_left * left_gain);
       *out_right += (in_right * right_gain);
 
@@ -69,8 +71,11 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
 
       float sample = clip_buffer[i];
 
+      akit_dsp_process(engine, &sample, &sample);
+
       *out_left += (sample * left_gain);
       *out_right += (sample * right_gain);
+
 
       *out_left = akit_dsp_get_corrected_sample(*out_left);
       *out_right = akit_dsp_get_corrected_sample(*out_right);
