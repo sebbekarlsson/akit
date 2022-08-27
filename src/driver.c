@@ -131,3 +131,17 @@ int akit_driver_wait(AkitDriver* driver, int timeout) {
   assert(0 && "Not reached");
   return 0;
 }
+
+int64_t akit_driver_get_delay(AkitDriver* driver) {
+        switch (driver->type) {
+  case AKIT_DRIVER_TYPE_ASOUND:
+    return akit_driver_asound_get_delay(driver);
+    break;
+  case AKIT_DRIVER_TYPE_JACK:
+  { fprintf(stderr, "Jack not implemented"); return 0; };
+    break;
+  }
+
+  assert(0 && "Not reached");
+  return 0;
+}

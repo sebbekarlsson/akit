@@ -19,6 +19,7 @@ int akit_driver_asound_flush(AkitDriver* driver);
 int akit_driver_asound_prepare(AkitDriver* driver);
 int akit_driver_asound_reset(AkitDriver* driver);
 int akit_driver_asound_wait(AkitDriver* driver, int timeout);
+int64_t akit_driver_asound_get_delay(AkitDriver* driver);
 
 int64_t akit_driver_asound_get_avail(AkitDriver* driver);
 

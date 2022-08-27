@@ -224,7 +224,7 @@ int akit_driver_asound_reset(AkitDriver* driver) {
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
 
   snd_pcm_reset(asound->pcm_handle);
-  snd_pcm_rewind(asound->pcm_handle, MAX(snd_pcm_rewindable(asound->pcm_handle), AKIT_FRAME_LENGTH));
+  //snd_pcm_rewind(asound->pcm_handle, MAX(snd_pcm_rewindable(asound->pcm_handle), AKIT_FRAME_LENGTH));
   snd_pcm_nonblock(asound->pcm_handle, 1);
 
   return 1;
@@ -242,4 +242,21 @@ int akit_driver_asound_wait(AkitDriver* driver, int timeout) {
 
   snd_pcm_wait(asound->pcm_handle, timeout);
   return 1;
+}
+
+
+int64_t akit_driver_asound_get_delay(AkitDriver* driver) {
+        if (!driver->driver)
+    return 0;
+  if (driver->type != AKIT_DRIVER_TYPE_ASOUND)
+    return 0;
+  if (!driver->initialized)
+    return 0;
+
+  AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
+
+
+  snd_pcm_sframes_t frames = 0;
+  snd_pcm_delay(asound->pcm_handle, &frames);
+  return frames;
 }

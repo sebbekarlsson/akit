@@ -41,5 +41,7 @@ int akit_driver_wait(AkitDriver* driver, int timeout);
 
 int64_t akit_driver_get_avail(AkitDriver* driver);
 
+int64_t akit_driver_get_delay(AkitDriver* driver);
+
 
 #endif
