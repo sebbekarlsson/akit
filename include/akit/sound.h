@@ -35,13 +35,26 @@ typedef struct {
   int64_t cursor;
   double time_pushed;
   double last_process;
-
-
-
 } AkitSoundClip;
 
 
 void akit_sound_compute_gain(AkitSound sound, AkitListener listener, float* left_gain, float* right_gain);
 
+void akit_sound_clip_free(AkitSoundClip* clip);
 void akit_sound_clip_destroy(AkitSoundClip* clip);
+
+
+int akit_sound_copy(
+  AkitSound src,
+  AkitSound* dest,
+  int64_t start,
+  int64_t length
+);
+
+int akit_sound_clip_copy(
+  AkitSoundClip src,
+  AkitSoundClip* dest,
+  int64_t start,
+  int64_t length
+);
 #endif

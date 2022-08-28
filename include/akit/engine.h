@@ -26,13 +26,13 @@ typedef struct {
   AkitDriver driver;
   AkitEngineConfig config;
   AkitArray clips;
-
-  float* tape;
-  float* tape_fx;
+  AkitArray queue;
 
   pthread_t thread_id;
   pthread_mutex_t push_lock;
   pthread_mutex_t process_lock;
+
+  AkitSoundClip* mixed_clip;
 
   double time;
   int64_t frame;

@@ -10,6 +10,7 @@ int akit_engine_init(AkitEngine *engine, AkitEngineConfig config) {
   engine->initialized = true;
   engine->config = config;
   akit_array_init(&engine->clips, sizeof(AkitSoundClip *));
+  akit_array_init(&engine->queue, sizeof(AkitSoundClip *));
   engine->stopped = true;
 
   return 1;
@@ -116,16 +117,7 @@ int64_t akit_engine_get_channels(AkitEngine *engine) {
 }
 
 int akit_engine_clear_tape(AkitEngine *engine) {
-  if (!engine->initialized)
-    return 0;
-  if (!engine->tape)
-    return 0;
-
-  int64_t length = akit_engine_get_tape_length(engine) * AKIT_TAPE_LENGTH_MULTIPLIER;
-
-  memset(&engine->tape[0], 0, length * sizeof(float));
-
-  return 1;
+  return 0;
 }
 
 int akit_engine_set_listener(AkitEngine *engine, AkitListener listener) {
@@ -154,7 +146,7 @@ int akit_engine_clear_sounds(AkitEngine *engine) {
     double time_pushed = clip->time_pushed;
     double diff = now - time_pushed;
 
-    if (clip->cursor > 0 && (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH)) {
+    if ((clip->cursor > 0 && (clip->finished || diff >= AKIT_MAX_SOUND_LENGTH)) || clip->sound.gain <= 0.0000001f) {
       akit_sound_clip_destroy(clip);
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);

@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   config.type = AKIT_DRIVER_TYPE_ASOUND;
 
   AkitEngine engine = {0};
-  akit_engine_init(&engine, (AkitEngineConfig){ .driver_config = config, .max_sounds = 10, .normalize_stereo = true });
+  akit_engine_init(&engine, (AkitEngineConfig){ .driver_config = config, .max_sounds = 1024, .normalize_stereo = false });
   akit_engine_set_listener(&engine, (AkitListener){
     .forward = VEC3(0, 0, 1),
     .up = VEC3(0, 1, 0),
@@ -53,10 +53,11 @@ int main(int argc, char *argv[]) {
     .world_info = world_info
   });
 
-  akit_msleep(3000);
+  while (!akit_array_is_empty(&engine.clips)) {
+    akit_msleep(1);
+  }
 
-
-  akit_engine_push_sound(&engine, (AkitSound){
+/*  akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
     .length = wav.length,
     .sample_rate = wav.header.sample_rate,
@@ -66,7 +67,9 @@ int main(int argc, char *argv[]) {
     .block_align = wav.header.block_align,
     .gain = 1.0f,
     .world_info = world_info
-  });
+  });*/
+
+
 
 
   akit_msleep(1500 * (1.0f + wav.duration));
