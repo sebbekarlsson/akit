@@ -41,7 +41,12 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
   float left_gain = 0.0f;
   float right_gain = 0.0f;
 
-  akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
+  if (clip->sound.no_processing) {
+    left_gain = 1.0f;
+    right_gain = 1.0f;
+  } else {
+    akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
+  }
 
   //  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) -
   //  clip->cursor);

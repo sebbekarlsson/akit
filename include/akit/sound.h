@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vec3/vec3.h>
 #include <akit/listener.h>
+#include <stdbool.h>
 
 typedef struct {
   Vector3 size;
@@ -23,6 +24,7 @@ typedef struct {
   double start_time;
   bool ignore_full;
   float gain;
+  bool no_processing;
 } AkitSound;
 
 
