@@ -128,6 +128,8 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
       (clip->cursor) >= (clip_length) || clip->cursor >= cursor_end) {
     clip->finished = true;
   }
+
+  clip->sound.position = vector3_add(clip->sound.position, clip->sound.velocity);
 }
 
 void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,

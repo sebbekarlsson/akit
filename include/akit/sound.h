@@ -15,6 +15,7 @@ typedef struct {
   int64_t length;
   float sample_rate;
   Vector3 position;
+  Vector3 velocity;
   AkitWorldInfo world_info;
   double duration;
   int64_t channels;
