@@ -70,12 +70,20 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .gain = 1.0f,
+    .name = "test2",
     .world_info = world_info
   });
 
 
+  float p = 1.0f;
+
   while (akit_engine_is_playing(&engine)) {
-    akit_msleep(30);
+    akit_engine_update_sound(&engine, "test2", (AkitSound){
+       .gain = p
+    });
+    akit_msleep(10);
+
+    p *= 0.99f;
   }
 
   akit_engine_stop(&engine);

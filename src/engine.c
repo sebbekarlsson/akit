@@ -213,3 +213,24 @@ bool akit_engine_is_playing(AkitEngine* engine) {
 
   return true;
 }
+
+int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update) {
+  if (!engine) return 0;
+  if (!engine->initialized) return 0;
+  if (engine->clips.length <= 0) return 0;
+  if (!name) return 0;
+
+
+
+  AkitSoundClip* clip = hashy_map_get(&engine->sounds_playing, name);
+  if (!clip) return 0;
+
+  pthread_mutex_trylock(&engine->process_lock);
+
+  clip->sound.gain = update.gain;
+  clip->sound.position = update.position;
+
+  pthread_mutex_unlock(&engine->process_lock);
+
+  return 1;
+}

@@ -54,6 +54,9 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
     right_gain *= fader;
   }
 
+  left_gain *= clip->sound.gain;
+  right_gain *= clip->sound.gain;
+
   //  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) -
   //  clip->cursor);
 
@@ -154,7 +157,7 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
       clip->time_pushed = time;
     }
 
-    if (clip->finished && clip->cursor > 0) {
+    if ((clip->finished && clip->cursor > 0) || clip->sound.gain <= AKIT_DSP_GAIN_SILENCE) {
       if (clip->sound.name != 0) {
         hashy_map_unset(&engine->sounds_playing, clip->sound.name);
       }

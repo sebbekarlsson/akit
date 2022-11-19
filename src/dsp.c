@@ -1,13 +1,12 @@
 #include <akit/dsp.h>
 #include <akit/utils.h>
 #include <akit/macros.h>
+#include <akit/constants.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 
-#define AKIT_DSP_SAMPLE_TARGET 1.0f
-#define AKIT_DSP_SAMPLE_ERROR_TOLERANCE 0.1f
-#define AKIT_DSP_SILENCE 0.000001f
+
 
 
 float akit_dsp_get_sample_error(float sample) {

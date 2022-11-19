@@ -75,4 +75,6 @@ int akit_engine_stop_sound(AkitEngine* engine, const char* name);
 
 bool akit_engine_is_playing(AkitEngine* engine);
 
+int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update);
+
 #endif

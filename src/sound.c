@@ -58,8 +58,8 @@ void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
   left += inv_dist * 0.33f;
   right += inv_dist * 0.33f;
 
-  left = akit_clamp(left * sound.gain, 0.0f, 1.0f);
-  right = akit_clamp(right * sound.gain, 0.0f, 1.0f);
+  left = akit_clamp(left, 0.0f, 1.0f);
+  right = akit_clamp(right, 0.0f, 1.0f);
 
   if (left < 0 || isnan(left) || isinf(left))
     left = 0.0f;
