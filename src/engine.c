@@ -93,6 +93,9 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
   clip->time_pushed = 0;
   clip->sound = sound;
   clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
+  clip->fade_in = 0.0f;
+  clip->fade_out = 0.0f;
+  clip->sound.fade_time = clip->sound.fade_time;
 
   pthread_mutex_trylock(&engine->process_lock);
 
@@ -184,4 +187,29 @@ bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name) {
   if (!engine->sounds_playing.initialized) return false;
 
   return hashy_map_get(&engine->sounds_playing, name) != 0;
+}
+
+int akit_engine_stop_sound(AkitEngine* engine, const char* name) {
+  if (!engine) return 0;
+  if (!name) return 0;
+  if (engine->clips.length <= 0) return 0;
+  if (!engine->sounds_playing.initialized) return 0;
+  AkitSoundClip* clip = hashy_map_get(&engine->sounds_playing, name);
+  if (!clip) return 0;
+
+
+
+  pthread_mutex_trylock(&engine->process_lock);
+  clip->finished = true;
+  pthread_mutex_unlock(&engine->process_lock);
+
+  return 1;
+}
+
+bool akit_engine_is_playing(AkitEngine* engine) {
+  if (!engine) return false;
+  if (!engine->initialized) return false;
+  if (engine->clips.length <= 0) return false;
+
+  return true;
 }

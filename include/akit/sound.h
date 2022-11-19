@@ -27,6 +27,7 @@ typedef struct {
   float gain;
   bool no_processing;
   const char* name;
+  float fade_time;
 } AkitSound;
 
 
@@ -40,13 +41,17 @@ typedef struct {
   double time_pushed;
   double last_process;
 
+
+  float fade_in;
+  float fade_out;
+
   char* name;
 
 
 } AkitSoundClip;
 
 
-void akit_sound_compute_gain(AkitSound sound, AkitListener listener, float* left_gain, float* right_gain);
+void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener, float* left_gain, float* right_gain);
 
 void akit_sound_clip_destroy(AkitSoundClip* clip);
 #endif

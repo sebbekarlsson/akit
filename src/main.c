@@ -54,6 +54,12 @@ int main(int argc, char *argv[]) {
   });
 
 
+  akit_msleep(2000);
+
+
+  akit_engine_stop_sound(&engine, "test_sound");
+
+
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
     .length = wav.length,
@@ -67,7 +73,9 @@ int main(int argc, char *argv[]) {
   });
 
 
-  akit_msleep(1500 * (1.0f + wav.duration));
+  while (akit_engine_is_playing(&engine)) {
+    akit_msleep(30);
+  }
 
   akit_engine_stop(&engine);
 

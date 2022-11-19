@@ -8,8 +8,10 @@ static float safediv(float a, float b) {
   return a / b;
 }
 
-void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
+void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
                              float *left_gain, float *right_gain) {
+
+  AkitSound sound = clip->sound;
   float left = 0.0f;
   float right = 0.0f;
 
@@ -46,6 +48,21 @@ void akit_sound_compute_gain(AkitSound sound, AkitListener listener,
     left = 0.0f;
   if (right < 0 || isnan(right) || isinf(right))
     right = 0.0f;
+
+
+
+  if (sound.fade_time > 0.0f) {
+    float fade_out_start = fmaxf(0.0f, sound.duration - sound.fade_time);
+    float fade_out_end = sound.duration;
+    float fade_in = akit_clamp(clip->time / sound.fade_time, 0.0f, 1.0f);
+    float fade_out = 1.0f - akit_clamp((clip->time - fade_out_start) / sound.fade_time, 0.0f, 1.0f);
+    float fader = (fade_in * fade_out);
+
+    left *= fader;
+    right *= fader;
+  }
+
+
 
   *left_gain = left;
   *right_gain = right;

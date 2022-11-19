@@ -71,4 +71,8 @@ int64_t akit_engine_get_sound_limit(AkitEngine engine);
 
 bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name);
 
+int akit_engine_stop_sound(AkitEngine* engine, const char* name);
+
+bool akit_engine_is_playing(AkitEngine* engine);
+
 #endif

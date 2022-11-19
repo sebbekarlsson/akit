@@ -22,14 +22,14 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
     cursor_end = INT64_MAX;
   }
 
-
-
-
   if (clip->time >= (clip->sound.duration * 2) ||
       (clip->cursor + length) >= (clip_length) || clip->cursor >= cursor_end) {
     clip->finished = true;
     return;
   }
+
+
+
 
   float sample_rate =
       OR(clip->sound.sample_rate, akit_engine_get_sample_rate(engine));
@@ -45,7 +45,7 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
     left_gain = 1.0f;
     right_gain = 1.0f;
   } else {
-    akit_sound_compute_gain(clip->sound, listener, &left_gain, &right_gain);
+    akit_sound_compute_gain(clip, listener, &left_gain, &right_gain);
   }
 
   //  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) -
@@ -137,6 +137,7 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
 
   for (int64_t i = 0; i < engine->clips.length; i++) {
     AkitSoundClip *clip = (AkitSoundClip *)engine->clips.items[i];
+    if (!clip) continue;
 
 
     if (engine->time < clip->sound.start_time && clip->sound.start_time > 0) {
@@ -160,11 +161,13 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
     }
   }
 
+  #if 0
   float* fx_buffer = &engine->tape_fx[frame];
 
   for (int64_t i = 0; i < length; i++) {
     buffer[i] += fx_buffer[i];
   }
+#endif
 }
 
 void *akit_engine_thread(void *ptr) {
