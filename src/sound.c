@@ -62,4 +62,9 @@ void akit_sound_clip_destroy(AkitSoundClip *clip) {
   clip->sound.length = 0;
   clip->sound.duration = 0;
   clip->sound.sample_rate = 0;
+
+  if (clip->name != 0) {
+    free(clip->name);
+  }
+  clip->name = 0;
 }

@@ -12,6 +12,9 @@ int akit_engine_init(AkitEngine *engine, AkitEngineConfig config) {
   akit_array_init(&engine->clips, sizeof(AkitSoundClip *));
   engine->stopped = true;
 
+
+  hashy_map_init(&engine->sounds_playing, OR(config.max_sounds, 128));
+
   return 1;
 }
 
@@ -92,6 +95,11 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
   clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
 
   pthread_mutex_trylock(&engine->process_lock);
+
+  if (clip->sound.name != 0) {
+    clip->name = strdup(clip->sound.name);
+    hashy_map_set(&engine->sounds_playing, clip->sound.name, clip);
+  }
   akit_array_push(&engine->clips, clip);
   pthread_mutex_unlock(&engine->process_lock);
 
@@ -167,4 +175,13 @@ int akit_engine_clear_sounds(AkitEngine *engine) {
 
 int64_t akit_engine_get_sound_limit(AkitEngine engine) {
   return OR(engine.config.max_sounds, AKIT_MAX_SOUNDS);
+}
+
+bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name) {
+  if (!engine) return false;
+  if (!name) return false;
+  if (engine->clips.length <= 0) return false;
+  if (!engine->sounds_playing.initialized) return false;
+
+  return hashy_map_get(&engine->sounds_playing, name) != 0;
 }

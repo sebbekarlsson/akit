@@ -42,6 +42,17 @@ if (NOT TARGET hashmap_static)
   FetchContent_MakeAvailable(hashmap_static)
 endif()
 
+  if (NOT TARGET hashy_static)
+
+    FetchContent_Declare(
+      hashy_static
+      URL /home/ianertson/workspace/hashy
+      # GIT_REPOSITORY https://github.com/sebbekarlsson/hashmap.git
+      # GIT_TAG master
+      )
+
+    FetchContent_MakeAvailable(hashy_static)
+  endif()
 
 if (NOT TARGET waves_static)
   FetchContent_Declare(
@@ -58,6 +69,7 @@ function (akit_init TARGET_NAME)
     ${TARGET_NAME}
     vec3_static
     hashmap_static
+    hashy_static
     waves_static
     date_static
     cglm

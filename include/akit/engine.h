@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+#include <hashy/hashy.h>
 
 typedef struct {
   AkitDriverConfig driver_config;
@@ -29,6 +29,8 @@ typedef struct {
 
   float* tape;
   float* tape_fx;
+
+  HashyMap sounds_playing;
 
   pthread_t thread_id;
   pthread_mutex_t push_lock;
@@ -66,5 +68,7 @@ int akit_engine_clear_sounds(AkitEngine* engine);
 AkitListener akit_engine_get_listener(AkitEngine engine);
 
 int64_t akit_engine_get_sound_limit(AkitEngine engine);
+
+bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name);
 
 #endif

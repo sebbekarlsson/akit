@@ -148,6 +148,9 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
     }
 
     if (clip->finished && clip->cursor > 0) {
+      if (clip->sound.name != 0) {
+        hashy_map_unset(&engine->sounds_playing, clip->sound.name);
+      }
       akit_sound_clip_destroy(clip);
       akit_array_remove(&engine->clips, clip, 0);
       free(clip);

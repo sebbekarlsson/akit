@@ -26,6 +26,7 @@ typedef struct {
   bool ignore_full;
   float gain;
   bool no_processing;
+  const char* name;
 } AkitSound;
 
 
@@ -39,6 +40,7 @@ typedef struct {
   double time_pushed;
   double last_process;
 
+  char* name;
 
 
 } AkitSoundClip;
