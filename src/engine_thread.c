@@ -41,7 +41,7 @@ void akit_engine_process_clip(AkitEngine *engine, AkitSoundClip *clip,
   float left_gain = 0.0f;
   float right_gain = 0.0f;
 
-  if (clip->sound.no_processing) {
+  if (clip->sound.no_processing && clip->sound.fade_time <= 0.0f) {
     left_gain = 1.0f;
     right_gain = 1.0f;
   } else {
