@@ -50,7 +50,8 @@ int main(int argc, char *argv[]) {
     .block_align = wav.header.block_align,
     .name = "test_sound",
     .gain = 0.5f,
-    .world_info = world_info
+    .world_info = world_info,
+    .fade_time = 2.0f
   });
 
 

@@ -53,5 +53,8 @@ typedef struct {
 
 void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener, float* left_gain, float* right_gain);
 
+float akit_sound_compute_fader(AkitSoundClip* clip);
+
+
 void akit_sound_clip_destroy(AkitSoundClip* clip);
 #endif
