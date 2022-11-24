@@ -1,6 +1,8 @@
 #include <akit/driver.h>
 #include <akit/driver_asound.h>
 #include <akit/driver_jack.h>
+#include <akit/macros.h>
+#include <akit/constants.h>
 #include <assert.h>
 #include <stdio.h>
 
@@ -21,6 +23,9 @@ static int akit_driver_setup(AkitDriver *driver, AkitDriverType type) {
 int akit_driver_init(AkitDriver *driver, AkitDriverConfig config) {
   if (driver->initialized)
     return 0;
+
+  config.timeout = OR(config.timeout, AKIT_DRIVER_TIMEOUT);
+
   driver->initialized = true;
   driver->config = config;
   driver->type = config.type;

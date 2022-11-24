@@ -2,6 +2,7 @@
 #include <akit/driver_asound.h>
 #include <akit/macros.h>
 #include <akit/sleep.h>
+#include <date/date.h>
 #include <stdio.h>
 
 #define AKIT_DRIVER_ASOUND_SAMPLE_TYPE SND_PCM_FORMAT_FLOAT
@@ -108,11 +109,30 @@ int akit_driver_asound_setup(AkitDriver *driver) {
 
   //snd_pcm_nonblock(asound->pcm_handle, 1);
 
+  Date start = date_now();
+
   while (snd_pcm_state(asound->pcm_handle) != SND_PCM_STATE_PREPARED) {
     akit_msleep(1);
+
+
+    Date now = date_now();
+    Date diff = date_diff(&now, &start);
+
+    if (diff.milliseconds_static >= driver->config.timeout) {
+      AKIT_WARNING(stderr, "Timeout.\n");
+      free(asound);
+      asound = 0;
+      return 0;
+      break;
+    }
   }
 
-  snd_pcm_start(asound->pcm_handle);
+  if (snd_pcm_start(asound->pcm_handle) != 0) {
+    AKIT_WARNING(stderr, "Failed to start pcm.\n");
+    free(asound);
+    asound = 0;
+    return 0;
+  }
 
   driver->driver = asound;
   driver->initialized = true;
@@ -162,6 +182,7 @@ int akit_driver_asound_destroy(AkitDriver *driver) {
 
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
 
+  snd_pcm_close(asound->pcm_handle);
   snd_pcm_drain(asound->pcm_handle);
 
   free(asound);

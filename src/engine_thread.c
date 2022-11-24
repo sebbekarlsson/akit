@@ -148,6 +148,8 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
     AkitSoundClip *clip = (AkitSoundClip *)engine->clips.items[i];
     if (!clip) continue;
 
+    if (!akit_engine_is_running(engine)) break;
+
 
     if (engine->time < clip->sound.start_time && clip->sound.start_time > 0) {
       continue;
@@ -200,7 +202,6 @@ void *akit_engine_thread(void *ptr) {
     return 0;
   }
 
-  engine->stopped = false;
   engine->running = true;
 
   printf("(Akit): Engine started.\n");
@@ -229,7 +230,7 @@ void *akit_engine_thread(void *ptr) {
   akit_msleep(1);
   double wanted_delay = time_unit * 1000;
 
-  while (true) {
+  while (akit_engine_is_running(engine)) {
 
     if (akit_array_is_empty(&engine->clips)) {
       akit_msleep(wanted_delay);
@@ -280,17 +281,15 @@ void *akit_engine_thread(void *ptr) {
       engine->frame += frame_length * channels;
     }
 
-    // akit_driver_wait(&engine->driver, 1);
 
-    if (engine->stopped || !engine->running) {
-      akit_driver_destroy(&engine->driver);
-      break;
+    if (engine->time >= (FLT_MAX-60.0f)) {
+      engine->time = 0.0f;
     }
+
+    // akit_driver_wait(&engine->driver, 1);
   }
 
-  if (engine->time >= (FLT_MAX-60.0f)) {
-    engine->time = 0.0f;
-  }
+  akit_driver_destroy(&engine->driver);
 
   printf("(Akit): Engine stopped.\n");
   pthread_exit(0);

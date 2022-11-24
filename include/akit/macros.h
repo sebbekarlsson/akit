@@ -11,4 +11,10 @@
 
 #define OR(a, b) a ? a : b
 
+#define AKIT_WARNING(...)                                                      \
+  {                                                                            \
+    printf("(AKIT)(Warning)(%s): \n", __func__);   \
+    fprintf(__VA_ARGS__);                                                      \
+  }
+
 #endif

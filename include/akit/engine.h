@@ -18,7 +18,6 @@ typedef struct {
 typedef struct {
   bool initialized;
 
-  volatile bool stopped;
   volatile bool running;
 
   volatile AkitListener listener;
@@ -74,6 +73,8 @@ bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name);
 int akit_engine_stop_sound(AkitEngine* engine, const char* name);
 
 bool akit_engine_is_playing(AkitEngine* engine);
+
+bool akit_engine_is_running(AkitEngine* engine);
 
 int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update);
 

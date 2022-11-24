@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
   akit_msleep(2000);
 
 
+  #if 0
   akit_engine_stop_sound(&engine, "test_sound");
 
 
@@ -74,11 +75,13 @@ int main(int argc, char *argv[]) {
     .world_info = world_info
   });
 
+  #endif
+
 
   float p = 1.0f;
 
   while (akit_engine_is_playing(&engine)) {
-    akit_engine_update_sound(&engine, "test2", (AkitSound){
+    akit_engine_update_sound(&engine, "test_sound", (AkitSound){
        .gain = p
     });
     akit_msleep(10);

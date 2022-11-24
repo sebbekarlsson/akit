@@ -12,6 +12,7 @@ typedef struct {
   AkitDriverType type;
   unsigned int sample_rate;
   uint64_t frame_length;
+  double timeout;
 } AkitDriverConfig;
 
 typedef struct {
