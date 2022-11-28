@@ -25,13 +25,11 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
   AkitPluginReverbState *state = (AkitPluginReverbState *)plugin->user_ptr;
   AkitPluginReverbConfig cfg = state->config;
 
-  float ping_left =
-      mif_cos_n(time * cfg.pingpong_speed.x) * cfg.pingpong_amplitude;
-  float ping_right =
-      mif_sin_n(time * cfg.pingpong_speed.y) * cfg.pingpong_amplitude;
+  float ping_left = fabsf(0.5f + (0.5f * cosf(time * cfg.pingpong_speed.x)));
+  float ping_right = fabsf(0.5f + (0.5f * sinf(time * cfg.pingpong_speed.y)));
 
-  left_gain *= fmaxf(0.0f, 1.0f - ping_left);
-  right_gain *= fmaxf(0.0f, 1.0f - ping_right);
+  left_gain += fmaxf(0.0f, ping_left - ping_right) * cfg.pingpong_amplitude;
+  right_gain += fmaxf(0.0f, ping_right - ping_left) * cfg.pingpong_amplitude;
 
   float rate = akit_engine_get_sample_rate(engine);
 

@@ -56,8 +56,8 @@ int main(int argc, char *argv[]) {
     .reverb.mix = 0.6f,
     .reverb.delay = 0.6f,
     .reverb.feedback = 0.5f,
-    .reverb.pingpong_amplitude = 0.5,
-    .reverb.pingpong_speed = VEC2(2.5f, 5.0f),
+    .reverb.pingpong_amplitude = 0.7f,
+    .reverb.pingpong_speed = VEC2(8.0f, 16.0f),
     .fade_time = 0.0f
   });
 
