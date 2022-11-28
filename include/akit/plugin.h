@@ -18,6 +18,7 @@ typedef struct AKIT_PLUGIN_STRUCT {
   AkitPluginConfig config;
   float* buffer;
   int64_t buffer_length;
+  int64_t ticks;
   void* user_ptr;
   double last_process;
   bool initialized;

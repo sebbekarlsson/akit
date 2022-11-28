@@ -40,11 +40,11 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     float delayed_left = plugin->buffer[state->delay_line_index * 2];
     float delayed_right = plugin->buffer[1 + state->delay_line_index * 2];
 
+    float in_left = buffer[i * 2];
+    float in_right = buffer[1 + i * 2];
 
-    buffer[i * 2] =
-        (buffer[i * 2] * delay_dry_mix) + (delayed_left * delay_wet_mix);
-    buffer[1 + i * 2] =
-        (buffer[1 + i * 2] * delay_dry_mix) + (delayed_left * delay_wet_mix);
+    buffer[i * 2] = (in_left * delay_dry_mix) + (delayed_left * delay_wet_mix);
+    buffer[1 + i * 2] = (in_right * delay_dry_mix) + (delayed_left * delay_wet_mix);
 
 
     float next_left = delay_feedback * (delayed_left + buffer[i * 2]);
@@ -53,16 +53,17 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     plugin->buffer[state->delay_line_index * 2] = next_left;
     plugin->buffer[1 + state->delay_line_index * 2] = next_right;
 
-    avg += (fabsf(next_left) + fabsf(next_right)) / 2.0f;
+    avg += (fabsf(next_left) + fabsf(next_right));
+    avg += (fabsf(in_left) + fabsf(in_right));
 
     if (state->delay_line_index++ >= delay_len_samples) {
       state->delay_line_index = 0;
     }
   }
 
-  avg /= (float)length;
+  avg /= (((float)length) / 2.0f);
 
-  return avg >= 0.00001f || (time <= 1.0f);
+  return avg >= 0.00001f || (time <= 1.0f) || plugin->ticks < 256;
 }
 
 static void akit_plugin_reverb_destroy(AkitPlugin *plugin) {

@@ -49,12 +49,12 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.1f,
+    .gain = 0.6f,
     .random_seed = akit_random_range(1.0f, 100.0f),
     .random_factor = 0.99f,
     .reverb.mix = 0.5f,
     .reverb.delay = 1.0f,
-    .reverb.feedback = 0.7f,
+    .reverb.feedback = 0.5f,
     .fade_time = 0.0f
   });
 
