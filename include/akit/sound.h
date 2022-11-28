@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vec3/vec3.h>
 #include <akit/listener.h>
+#include <akit/plugin_reverb_config.h>
 #include <stdbool.h>
 #include <mac/buffer.h>
 #include <mac/list.h>
@@ -32,7 +33,8 @@ typedef struct {
   float random_factor;
   const char* name;
   float fade_time;
-  float reverb_mix;
+
+  AkitPluginReverbConfig reverb;
 } AkitSound;
 
 

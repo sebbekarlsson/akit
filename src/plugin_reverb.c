@@ -13,19 +13,20 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     return 0;
   }
 
-  PluginReverbState *state = (PluginReverbState *)plugin->user_ptr;
+  AkitPluginReverbState *state = (AkitPluginReverbState *)plugin->user_ptr;
+  AkitPluginReverbConfig cfg = state->config;
 
   float rate = akit_engine_get_sample_rate(engine);
 
-  int64_t max_delay_seconds = 5;
-  float delay_len_seconds = 1.0f;
+  int64_t max_delay_seconds = 6;
+  float delay_len_seconds = cfg.delay;
 
   int64_t delay_len_samples = (int64_t)delay_len_seconds * rate;
 
-  float delay_wet_mix = 0.4f;
+  float delay_wet_mix = cfg.mix;
   float delay_dry_mix = fmaxf(0.0f, 1.0f - delay_wet_mix);
 
-  float delay_feedback = 0.45f;
+  float delay_feedback = OR(cfg.feedback, 0.45f);
 
   int64_t delay_line_size = rate * max_delay_seconds;
 
@@ -70,12 +71,16 @@ static void akit_plugin_reverb_destroy(AkitPlugin *plugin) {
   }
 }
 
-int akit_plugin_reverb_init(AkitPlugin *plugin) {
+int akit_plugin_reverb_init(AkitPlugin *plugin, AkitPluginReverbConfig cfg) {
   if (!akit_plugin_init(
           plugin, (AkitPluginConfig){
                       .process_callback = akit_plugin_reverb_process_block,
                       .destroy_callback = akit_plugin_reverb_destroy}))
     return 0;
-  plugin->user_ptr = NEW(PluginReverbState);
+  plugin->user_ptr = NEW(AkitPluginReverbState);
+
+  AkitPluginReverbState* state = (AkitPluginReverbState*)plugin->user_ptr;
+  state->config = cfg;
+
   return plugin->user_ptr != 0;
 }
