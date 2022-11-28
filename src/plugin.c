@@ -18,9 +18,7 @@ int akit_plugin_init(AkitPlugin* plugin, AkitPluginConfig cfg) {
 
 int akit_plugin_process_block(AkitEngine* engine, AkitPlugin* plugin, float* buffer, int64_t length, int64_t frame, double time) {
   if (!plugin->config.process_callback) return 0;
-  plugin->config.process_callback(engine, plugin, buffer, length, frame, time);
-
-  return 1;
+  return plugin->config.process_callback(engine, plugin, buffer, length, frame, time);
 }
 
 void akit_plugin_destroy(AkitPlugin* plugin) {

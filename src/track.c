@@ -187,7 +187,7 @@ int akit_track_process_block(struct AKIT_ENGINE_STRUCT* engine, AkitTrack* track
     }
   }
 
-  return track->clips.length > 0;
+  return track->clips.length > 0 || track->plugins.length > 0;
 }
 
 void akit_track_destroy(AkitTrack* track) {
