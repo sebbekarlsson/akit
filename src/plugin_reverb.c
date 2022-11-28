@@ -18,10 +18,10 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
 
   float rate = akit_engine_get_sample_rate(engine);
 
-  int64_t max_delay_seconds = 6;
+  int64_t max_delay_seconds = 10;
   float delay_len_seconds = cfg.delay;
 
-  int64_t delay_len_samples = (int64_t)delay_len_seconds * rate;
+  int64_t delay_len_samples = delay_len_seconds * rate;
 
   float delay_wet_mix = cfg.mix;
   float delay_dry_mix = fmaxf(0.0f, 1.0f - delay_wet_mix);
