@@ -17,6 +17,7 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
   AkitListener listener = akit_engine_get_listener(*engine);
   Vector3 position = plugin->config.position;
 
+
   float left_gain = 1.0f;
   float right_gain = 1.0f;
 
@@ -33,8 +34,10 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
 
   int64_t delay_len_samples = delay_len_seconds * rate;
 
-  float delay_wet_mix = cfg.mix;
-  float delay_dry_mix = fmaxf(0.0f, 1.0f - delay_wet_mix);
+  float delay_wet_mix_left = cfg.mix * left_gain;
+  float delay_wet_mix_right = cfg.mix * right_gain;
+  float delay_dry_mix_left = fmaxf(0.0f, 1.0f - delay_wet_mix_left);
+  float delay_dry_mix_right = fmaxf(0.0f, 1.0f - delay_wet_mix_right);
 
   float delay_feedback = OR(cfg.feedback, 0.45f);
 
@@ -55,15 +58,15 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     float in_left = buffer[i * 2];
     float in_right = buffer[1 + i * 2];
 
-    buffer[i * 2] = (in_left * delay_dry_mix) + (delayed_left * delay_wet_mix);
-    buffer[1 + i * 2] = (in_right * delay_dry_mix) + (delayed_left * delay_wet_mix);
+    buffer[i * 2] = (in_left * delay_dry_mix_left) + (delayed_left * delay_wet_mix_left);
+    buffer[1 + i * 2] = (in_right * delay_dry_mix_right) + (delayed_left * delay_wet_mix_right);
 
 
     float next_left = (delay_feedback * (delayed_left + buffer[i * 2])) * min_falloff;
     float next_right = (delay_feedback * (delayed_right + buffer[1 + i * 2])) * min_falloff;
 
-    plugin->buffer[state->delay_line_index * 2] = next_left * left_gain;
-    plugin->buffer[1 + state->delay_line_index * 2] = next_right * right_gain;
+    plugin->buffer[state->delay_line_index * 2] = next_left;
+    plugin->buffer[1 + state->delay_line_index * 2] = next_right;
 
     avg += (fabsf(next_left) + fabsf(next_right));
     avg += (fabsf(in_left) + fabsf(in_right));

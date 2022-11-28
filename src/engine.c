@@ -117,6 +117,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     if (track->plugins.length <= 0) {
       AkitPlugin reverb = {0};
       akit_plugin_reverb_init(&reverb, sound.reverb);
+      reverb.config.position = sound.position;
       akit_track_push_plugin(track, reverb);
     }
 
