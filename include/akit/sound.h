@@ -62,7 +62,7 @@ typedef struct {
 MAC_DEFINE_BUFFER(AkitSoundClip);
 MAC_DEFINE_LIST(AkitSoundClip);
 
-void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener, float* left_gain, float* right_gain);
+void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* left_gain, float* right_gain);
 
 float akit_sound_compute_fader(AkitSoundClip* clip);
 

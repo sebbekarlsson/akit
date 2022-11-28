@@ -7,8 +7,9 @@ MAC_IMPLEMENT_LIST(AkitSoundClip);
 
 
 static float safediv(float a, float b) {
-  if (ceilf(fabsf(b)) == 0.0f)
+  if (ceilf(fabsf(b)) == 0.0f) {
     b = 1.0f;
+  }
   return a / b;
 }
 
@@ -29,10 +30,8 @@ float akit_sound_compute_fader(AkitSoundClip* clip) {
   return fader;
 }
 
-void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
-                             float *left_gain, float *right_gain) {
+void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* left_gain, float* right_gain) {
 
-  AkitSound sound = clip->sound;
   float left = 0.0f;
   float right = 0.0f;
 
@@ -40,14 +39,21 @@ void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
 
   Vector3 forward = vector3_unit(listener.forward);
 
-  float dist = fabsf(vector3_distance3d(listener.position, sound.position)) * dm;
+  float dist = fabsf(vector3_distance3d(listener.position, position)) * dm;
+
+  if (dist <= 0.0001f) {
+    *left_gain = 1.0f;
+    *right_gain = 1.0f;
+    return;
+  }
+
   float inv_dist = safediv(1.0f, dist);
 
   Vector3 left_right = vector3_unit(vector3_cross(forward, listener.up));
   Vector3 left_dir = vector3_scale(left_right, -1);
   Vector3 right_dir = vector3_scale(left_right, 1);
   Vector3 sound_dir =
-      vector3_unit(vector3_sub(sound.position, listener.position));
+      vector3_unit(vector3_sub(position, listener.position));
 
   left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, 0.33f));
   right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, 0.33f));

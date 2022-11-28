@@ -1,6 +1,7 @@
 #include <akit/engine.h>
 #include <akit/macros.h>
 #include <akit/plugin_reverb.h>
+#include <akit/sound.h>
 #include <mif/utils.h>
 #include <stdlib.h>
 
@@ -12,6 +13,15 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
   if (!plugin->user_ptr) {
     return 0;
   }
+
+  AkitListener listener = akit_engine_get_listener(*engine);
+  Vector3 position = plugin->config.position;
+
+  float left_gain = 1.0f;
+  float right_gain = 1.0f;
+
+  akit_sound_compute_gain(position, listener, &left_gain, &right_gain);
+
 
   AkitPluginReverbState *state = (AkitPluginReverbState *)plugin->user_ptr;
   AkitPluginReverbConfig cfg = state->config;
@@ -36,7 +46,7 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
 
   float avg = 0.0f;
 
-  const float min_falloff = 0.95f;
+  const float min_falloff = 0.85f;
 
   for (int64_t i = 0; i < length; i++) {
     float delayed_left = plugin->buffer[state->delay_line_index * 2];
@@ -52,8 +62,8 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     float next_left = (delay_feedback * (delayed_left + buffer[i * 2])) * min_falloff;
     float next_right = (delay_feedback * (delayed_right + buffer[1 + i * 2])) * min_falloff;
 
-    plugin->buffer[state->delay_line_index * 2] = next_left;
-    plugin->buffer[1 + state->delay_line_index * 2] = next_right;
+    plugin->buffer[state->delay_line_index * 2] = next_left * left_gain;
+    plugin->buffer[1 + state->delay_line_index * 2] = next_right * right_gain;
 
     avg += (fabsf(next_left) + fabsf(next_right));
     avg += (fabsf(in_left) + fabsf(in_right));

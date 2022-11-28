@@ -2,6 +2,7 @@
 #define AKIT_PLUGIN_H
 #include <mac/buffer.h>
 #include <stdbool.h>
+#include <vec3/vec3.h>
 
 struct AKIT_ENGINE_STRUCT;
 struct AKIT_PLUGIN_STRUCT;
@@ -12,6 +13,7 @@ typedef void (*AkitPluginDestroyCallback)(struct AKIT_PLUGIN_STRUCT* plugin);
 typedef struct {
   AkitPluginCallback process_callback;
   AkitPluginDestroyCallback destroy_callback;
+  Vector3 position;
 } AkitPluginConfig;
 
 typedef struct AKIT_PLUGIN_STRUCT {

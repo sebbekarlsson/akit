@@ -68,7 +68,7 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
     left_gain = 1.0f;
     right_gain = 1.0f;
   } else {
-    akit_sound_compute_gain(clip, listener, &left_gain, &right_gain);
+    akit_sound_compute_gain(clip->sound.position, listener, &left_gain, &right_gain);
   }
 
   if (clip->sound.fade_time > 0.0f) {
