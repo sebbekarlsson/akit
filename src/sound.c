@@ -2,6 +2,10 @@
 #include <akit/sound.h>
 #include <akit/utils.h>
 
+MAC_IMPLEMENT_BUFFER(AkitSoundClip);
+MAC_IMPLEMENT_LIST(AkitSoundClip);
+
+
 static float safediv(float a, float b) {
   if (ceilf(fabsf(b)) == 0.0f)
     b = 1.0f;
@@ -88,4 +92,9 @@ void akit_sound_clip_destroy(AkitSoundClip *clip) {
     free(clip->name);
   }
   clip->name = 0;
+}
+
+
+bool akit_sound_clip_wants_randomness(AkitSoundClip* clip) {
+  return clip->sound.random_seed > VEC3_TINY_FLOAT && clip->sound.random_factor > VEC3_TINY_FLOAT && clip->sound.duration >= VEC3_TINY_FLOAT;
 }

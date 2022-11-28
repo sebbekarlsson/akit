@@ -26,6 +26,15 @@ if (NOT TARGET vec3_static)
   FetchContent_MakeAvailable(vec3_static)
 endif()
 
+
+if (NOT TARGET mac_static)
+  FetchContent_Declare(
+    mac_static
+    URL /home/ianertson/workspace/mac
+    )
+  FetchContent_MakeAvailable(mac_static)
+endif()
+
 if (NOT TARGET date_static)
   FetchContent_Declare(
     date_static
@@ -33,6 +42,15 @@ if (NOT TARGET date_static)
     )
   FetchContent_MakeAvailable(date_static)
 endif()
+
+ if (NOT TARGET mif_static)
+    FetchContent_Declare(mif_static
+      URL /home/ianertson/workspace/mif
+      )
+
+    FetchContent_MakeAvailable(mif_static)
+target_compile_options(mif_static PUBLIC -g -Wall)
+  endif()
 
 if (NOT TARGET hashmap_static)
   FetchContent_Declare(
@@ -68,7 +86,9 @@ function (akit_init TARGET_NAME)
   target_link_libraries(
     ${TARGET_NAME}
     vec3_static
+    mif_static
     hashmap_static
+    mac_static
     hashy_static
     waves_static
     date_static

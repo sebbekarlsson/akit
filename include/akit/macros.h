@@ -9,12 +9,24 @@
 #define MAX(a, b) (a > b ? a : b)
 #endif
 
+#ifndef OR
 #define OR(a, b) a ? a : b
+#endif
 
 #define AKIT_WARNING(...)                                                      \
   {                                                                            \
-    printf("(AKIT)(Warning)(%s): \n", __func__);   \
+    printf("(Akit)(Warning)(%s): \n", __func__);   \
     fprintf(__VA_ARGS__);                                                      \
+  }
+
+
+#define AKIT_WARNING_RETURN(ret, ...)                                          \
+  {                                                                            \
+    printf("\n****\n");                                                        \
+    printf("(Akit)(Warning)(%s): \n", __func__);   \
+    fprintf(__VA_ARGS__);                                                      \
+    printf("\n****\n");                                                        \
+    return ret;                                                                \
   }
 
 #endif

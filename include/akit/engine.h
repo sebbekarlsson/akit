@@ -8,6 +8,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <hashy/hashy.h>
+#include <akit/constants.h>
+#include <akit/track.h>
+#include <mif/fft.h>
 
 typedef struct {
   AkitDriverConfig driver_config;
@@ -15,7 +18,7 @@ typedef struct {
   bool normalize_stereo;
 } AkitEngineConfig;
 
-typedef struct {
+typedef struct AKIT_ENGINE_STRUCT {
   bool initialized;
 
   volatile bool running;
@@ -24,7 +27,8 @@ typedef struct {
 
   AkitDriver driver;
   AkitEngineConfig config;
-  AkitArray clips;
+  AkitTrackBuffer tracks;
+  //AkitArray clips;
 
   float* tape;
   float* tape_fx;
@@ -77,5 +81,7 @@ bool akit_engine_is_playing(AkitEngine* engine);
 bool akit_engine_is_running(AkitEngine* engine);
 
 int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update);
+
+AkitTrack* akit_engine_get_available_track(AkitEngine* engine);
 
 #endif

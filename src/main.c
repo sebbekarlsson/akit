@@ -49,17 +49,18 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.5f,
-    .world_info = world_info,
-    .fade_time = 2.0f
+    .gain = 0.1f,
+    .random_seed = akit_random_range(1.0f, 100.0f),
+    .random_factor = 0.99f,
+    .reverb_mix = 1.0f,
+    .fade_time = 0.0f
   });
 
 
+#if 0
   akit_msleep(2000);
 
-
-  #if 0
-  akit_engine_stop_sound(&engine, "test_sound");
+//  akit_engine_stop_sound(&engine, "test_sound");
 
 
   akit_engine_push_sound(&engine, (AkitSound){
@@ -74,16 +75,15 @@ int main(int argc, char *argv[]) {
     .name = "test2",
     .world_info = world_info
   });
-
-  #endif
+#endif
 
 
   float p = 1.0f;
 
   while (akit_engine_is_playing(&engine)) {
-    akit_engine_update_sound(&engine, "test_sound", (AkitSound){
-       .gain = p
-    });
+   // akit_engine_update_sound(&engine, "test_sound", (AkitSound){
+    //   .gain = p
+   // });
     akit_msleep(10);
 
     p *= 0.99f;

@@ -2,6 +2,8 @@
 #include <akit/engine.h>
 #include <akit/macros.h>
 #include <akit/utils.h>
+#include <akit/plugin_limiter.h>
+#include <akit/plugin_reverb.h>
 #include <string.h>
 
 int akit_engine_init(AkitEngine *engine, AkitEngineConfig config) {
@@ -9,7 +11,8 @@ int akit_engine_init(AkitEngine *engine, AkitEngineConfig config) {
     return 0;
   engine->initialized = true;
   engine->config = config;
-  akit_array_init(&engine->clips, sizeof(AkitSoundClip *));
+  mac_AkitTrack_buffer_init(&engine->tracks);
+  //akit_array_init(&engine->clips, sizeof(AkitSoundClip *));
   engine->running = false;
 
 
@@ -73,6 +76,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     return 0;
   }
 
+  #if 0
   pthread_mutex_trylock(&engine->process_lock);
 
   int64_t max_sounds = akit_engine_get_sound_limit(*engine);
@@ -85,27 +89,56 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     }
   }
   pthread_mutex_unlock(&engine->process_lock);
+  #endif
 
   sound.sample_rate =
       OR(sound.sample_rate, akit_engine_get_sample_rate(engine));
 
-  AkitSoundClip *clip = NEW(AkitSoundClip);
-  clip->finished = false;
-  clip->cursor = clip->sound.cursor_start;
-  clip->time_pushed = 0;
-  clip->sound = sound;
-  clip->sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
-  clip->fade_in = 0.0f;
-  clip->fade_out = 0.0f;
-  clip->sound.fade_time = clip->sound.fade_time;
+  AkitSoundClip clip = {0};//NEW(AkitSoundClip);
+  clip.sound = sound;
+  clip.finished = false;
+  clip.cursor = clip.sound.cursor_start;
+  clip.time_pushed = 0;
+  clip.sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
+  clip.fade_in = 0.0f;
+  clip.fade_out = 0.0f;
 
   pthread_mutex_trylock(&engine->process_lock);
 
-  if (clip->sound.name != 0) {
-    clip->name = strdup(clip->sound.name);
-    hashy_map_set(&engine->sounds_playing, clip->sound.name, clip);
+
+  AkitTrack* track = 0;
+
+  if (sound.reverb_mix > 0.00001f) {
+    AkitTrack next_track = {0};
+    akit_track_init(&next_track);
+    track = mac_AkitTrack_buffer_push(&engine->tracks, next_track);
+
+
+    if (track->plugins.length <= 0) {
+      AkitPlugin reverb = {0};
+      akit_plugin_reverb_init(&reverb);
+      akit_track_push_plugin(track, reverb);
+    }
+
   }
-  akit_array_push(&engine->clips, clip);
+
+  track = OR(track, akit_engine_get_available_track(engine));
+
+  if (!track) {
+      fprintf(stderr, "(Akit): Sound buffer is full, please try again later.\n");
+      pthread_mutex_unlock(&engine->process_lock);
+      return 0;
+  }
+
+
+
+  akit_track_push(track, clip);
+
+ // if (clip->sound.name != 0) {
+  //  clip->name = strdup(clip->sound.name);
+   // hashy_map_set(&engine->sounds_playing, clip->sound.name, clip);
+ // }
+  //akit_array_push(&engine->clips, clip);
   pthread_mutex_unlock(&engine->process_lock);
 
   return 1;
@@ -154,6 +187,7 @@ AkitListener akit_engine_get_listener(AkitEngine engine) {
 }
 
 int akit_engine_clear_sounds(AkitEngine *engine) {
+  #if 0
   if (!engine->initialized)
     return 0;
   if (!engine->clips.length)
@@ -174,6 +208,7 @@ int akit_engine_clear_sounds(AkitEngine *engine) {
       clip = 0;
     }
   }
+  #endif
 
   return 1;
 }
@@ -185,17 +220,18 @@ int64_t akit_engine_get_sound_limit(AkitEngine engine) {
 bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name) {
   if (!engine) return false;
   if (!name) return false;
-  if (engine->clips.length <= 0) return false;
+  if (engine->tracks.length <= 0) return false;
   if (!engine->sounds_playing.initialized) return false;
   if (!akit_engine_is_running(engine)) return false;
 
-  return hashy_map_get(&engine->sounds_playing, name) != 0;
+  return true;
+  //return hashy_map_get(&engine->sounds_playing, name) != 0;
 }
 
 int akit_engine_stop_sound(AkitEngine* engine, const char* name) {
   if (!engine) return 0;
   if (!name) return 0;
-  if (engine->clips.length <= 0) return 0;
+  if (engine->tracks.length <= 0) return 0;
   if (!engine->sounds_playing.initialized) return 0;
   if (!akit_engine_is_running(engine)) return 0;
   AkitSoundClip* clip = hashy_map_get(&engine->sounds_playing, name);
@@ -213,7 +249,7 @@ int akit_engine_stop_sound(AkitEngine* engine, const char* name) {
 bool akit_engine_is_playing(AkitEngine* engine) {
   if (!engine) return false;
   if (!engine->initialized) return false;
-  if (engine->clips.length <= 0) return false;
+  if (engine->tracks.length <= 0) return false;
 
   return akit_engine_is_running(engine);
 }
@@ -221,7 +257,7 @@ bool akit_engine_is_playing(AkitEngine* engine) {
 int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update) {
   if (!engine) return 0;
   if (!engine->initialized) return 0;
-  if (engine->clips.length <= 0) return 0;
+  if (engine->tracks.length <= 0) return 0;
   if (!name) return 0;
 
 
@@ -237,4 +273,27 @@ int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound upd
   pthread_mutex_unlock(&engine->process_lock);
 
   return 1;
+}
+
+AkitTrack* akit_engine_get_available_track(AkitEngine* engine) {
+  if (!engine || !engine->initialized) return 0;
+  if (engine->tracks.length <= 0) {
+    if (!engine->tracks.initialized) {
+      mac_AkitTrack_buffer_init(&engine->tracks);
+    }
+    AkitTrack track = {0};
+    akit_track_init(&track);
+    mac_AkitTrack_buffer_push(&engine->tracks, track);
+  }
+
+  int64_t max_sounds = akit_engine_get_sound_limit(*engine);
+
+  for (int64_t i = 0; i < engine->tracks.length; i++) {
+    AkitTrack* track = &engine->tracks.items[i];
+    if (track->clips.length >= max_sounds) continue;
+
+    return track;
+  }
+
+  return 0;
 }

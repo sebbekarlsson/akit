@@ -4,6 +4,8 @@
 #include <vec3/vec3.h>
 #include <akit/listener.h>
 #include <stdbool.h>
+#include <mac/buffer.h>
+#include <mac/list.h>
 
 typedef struct {
   Vector3 size;
@@ -26,8 +28,11 @@ typedef struct {
   bool ignore_full;
   float gain;
   bool no_processing;
+  float random_seed;
+  float random_factor;
   const char* name;
   float fade_time;
+  float reverb_mix;
 } AkitSound;
 
 
@@ -44,6 +49,7 @@ typedef struct {
 
   float fade_in;
   float fade_out;
+  float timeshift;
 
   char* name;
 
@@ -51,10 +57,15 @@ typedef struct {
 } AkitSoundClip;
 
 
+MAC_DEFINE_BUFFER(AkitSoundClip);
+MAC_DEFINE_LIST(AkitSoundClip);
+
 void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener, float* left_gain, float* right_gain);
 
 float akit_sound_compute_fader(AkitSoundClip* clip);
 
 
 void akit_sound_clip_destroy(AkitSoundClip* clip);
+
+bool akit_sound_clip_wants_randomness(AkitSoundClip* clip);
 #endif
