@@ -47,15 +47,17 @@ int main(int argc, char *argv[]) {
     .sample_rate = wav.header.sample_rate,
     .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
-    .position = VEC3(4.0f, 0.0f, 1.0f),
+ //   .position = VEC3(4.0f, 0.0f, 1.0f),
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.5f,
+    .gain = 0.07f,
     .random_seed = akit_random_range(1.0f, 100.0f),
     .random_factor = 0.99f,
-    .reverb.mix = 0.5f,
-    .reverb.delay = 0.5f,
+    .reverb.mix = 0.6f,
+    .reverb.delay = 0.6f,
     .reverb.feedback = 0.5f,
+    .reverb.pingpong_amplitude = 0.5,
+    .reverb.pingpong_speed = VEC2(2.5f, 5.0f),
     .fade_time = 0.0f
   });
 

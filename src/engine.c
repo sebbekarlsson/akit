@@ -108,7 +108,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
 
   AkitTrack* track = 0;
 
-  if (sound.reverb.mix > 0.00001f && sound.reverb.delay > 0.01f) {
+  if (sound.reverb.mix > 0.00001f && sound.reverb.delay > 0.01f && sound.no_processing == false) {
     AkitTrack next_track = {0};
     akit_track_init(&next_track);
     track = mac_AkitTrack_buffer_push(&engine->tracks, next_track);
