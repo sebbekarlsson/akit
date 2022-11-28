@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.6f,
+    .gain = 2.5f,
     .random_seed = akit_random_range(1.0f, 100.0f),
     .random_factor = 0.99f,
     .reverb.mix = 0.5f,

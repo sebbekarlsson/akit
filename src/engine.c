@@ -99,7 +99,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
   clip.finished = false;
   clip.cursor = clip.sound.cursor_start;
   clip.time_pushed = 0;
-  clip.sound.gain = akit_clamp(sound.gain, 0.0f, 1.0f);
+  clip.sound.gain = akit_clamp(sound.gain, 0.0f, M_PI);
   clip.fade_in = 0.0f;
   clip.fade_out = 0.0f;
 
