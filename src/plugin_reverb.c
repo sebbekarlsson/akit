@@ -36,6 +36,8 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
 
   float avg = 0.0f;
 
+  const float min_falloff = 0.95f;
+
   for (int64_t i = 0; i < length; i++) {
     float delayed_left = plugin->buffer[state->delay_line_index * 2];
     float delayed_right = plugin->buffer[1 + state->delay_line_index * 2];
@@ -47,8 +49,8 @@ static int akit_plugin_reverb_process_block(AkitEngine *engine,
     buffer[1 + i * 2] = (in_right * delay_dry_mix) + (delayed_left * delay_wet_mix);
 
 
-    float next_left = delay_feedback * (delayed_left + buffer[i * 2]);
-    float next_right = delay_feedback * (delayed_right + buffer[1 + i * 2]);
+    float next_left = (delay_feedback * (delayed_left + buffer[i * 2])) * min_falloff;
+    float next_right = (delay_feedback * (delayed_right + buffer[1 + i * 2])) * min_falloff;
 
     plugin->buffer[state->delay_line_index * 2] = next_left;
     plugin->buffer[1 + state->delay_line_index * 2] = next_right;
