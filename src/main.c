@@ -33,13 +33,9 @@ int main(int argc, char *argv[]) {
 
   akit_engine_start(&engine);
 
-  printf("%12.6f\n", wav.duration);
-
   akit_msleep(1000);
 
-  AkitWorldInfo world_info = {0};
-  world_info.size = VEC3(128, 128, 128);
-  world_info.roughness = 0.5f;
+  for (int i = 0; i < 300; i++) {
 
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
@@ -53,13 +49,15 @@ int main(int argc, char *argv[]) {
     .gain = 0.07f,
     .random_seed = akit_random_range(1.0f, 100.0f),
     .random_factor = 0.99f,
-    .reverb.mix = 0.6f,
+    .reverb.mix = 0.5f,
     .reverb.delay = 0.6f,
-    .reverb.feedback = 0.5f,
+    .reverb.feedback = 0.45f,
     .reverb.pingpong_amplitude = 0.7f,
     .reverb.pingpong_speed = VEC2(8.0f, 16.0f),
     .fade_time = 0.0f
   });
+  akit_msleep(60);
+  }
 
 
 #if 0

@@ -21,5 +21,6 @@
 #define AKIT_FFT_SIZE (AKIT_SAMPLE_RATE)
 
 #define AKIT_CLIPS_PER_TRACK 16
+#define AKIT_TRACK_CAP 16
 
 #endif

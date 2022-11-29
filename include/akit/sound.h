@@ -9,17 +9,11 @@
 #include <mac/list.h>
 
 typedef struct {
-  Vector3 size;
-  float roughness;
-} AkitWorldInfo;
-
-typedef struct {
   float* data;
   int64_t length;
   float sample_rate;
   Vector3 position;
   Vector3 velocity;
-  AkitWorldInfo world_info;
   double duration;
   int64_t channels;
   int64_t block_align;
