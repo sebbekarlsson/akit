@@ -7,7 +7,9 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <hashy/hashy.h>
+#include <akit/constants.h>
+#include <akit/track.h>
+#include <mif/fft.h>
 
 typedef struct {
   AkitDriverConfig driver_config;
@@ -15,7 +17,7 @@ typedef struct {
   bool normalize_stereo;
 } AkitEngineConfig;
 
-typedef struct {
+typedef struct AKIT_ENGINE_STRUCT {
   bool initialized;
 
   volatile bool running;
@@ -24,12 +26,13 @@ typedef struct {
 
   AkitDriver driver;
   AkitEngineConfig config;
-  AkitArray clips;
+  AkitTrack* tracks;
+  volatile int64_t tracks_length;
+  //AkitArray clips;
 
   float* tape;
   float* tape_fx;
 
-  HashyMap sounds_playing;
 
   pthread_t thread_id;
   pthread_mutex_t push_lock;
@@ -66,16 +69,12 @@ int akit_engine_clear_sounds(AkitEngine* engine);
 
 AkitListener akit_engine_get_listener(AkitEngine engine);
 
-int64_t akit_engine_get_sound_limit(AkitEngine engine);
-
-bool akit_engine_sound_is_playing(AkitEngine* engine, const char* name);
-
-int akit_engine_stop_sound(AkitEngine* engine, const char* name);
 
 bool akit_engine_is_playing(AkitEngine* engine);
 
 bool akit_engine_is_running(AkitEngine* engine);
 
-int akit_engine_update_sound(AkitEngine* engine, const char* name, AkitSound update);
+
+AkitTrack* akit_engine_get_available_track(AkitEngine* engine);
 
 #endif

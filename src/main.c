@@ -33,13 +33,9 @@ int main(int argc, char *argv[]) {
 
   akit_engine_start(&engine);
 
-  printf("%12.6f\n", wav.duration);
-
   akit_msleep(1000);
 
-  AkitWorldInfo world_info = {0};
-  world_info.size = VEC3(128, 128, 128);
-  world_info.roughness = 0.5f;
+  for (int i = 0; i < 300; i++) {
 
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
@@ -47,20 +43,27 @@ int main(int argc, char *argv[]) {
     .sample_rate = wav.header.sample_rate,
     .duration = fmax(wav.duration, 0.5f),
     .channels = wav.header.channels,
+ //   .position = VEC3(4.0f, 0.0f, 1.0f),
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.6f,
-    .position = VEC3(8.0f, 0.0f, 1.0f),
-    .world_info = world_info
-    //.fade_time = 2.0f
+    .gain = 0.07f,
+    .random_seed = akit_random_range(1.0f, 100.0f),
+    .random_factor = 0.99f,
+    .reverb.mix = 0.5f,
+    .reverb.delay = 0.6f,
+    .reverb.feedback = 0.45f,
+    .reverb.pingpong_amplitude = 0.7f,
+    .reverb.pingpong_speed = VEC2(8.0f, 16.0f),
+    .fade_time = 0.0f
   });
+  akit_msleep(60);
+  }
 
 
+#if 0
   akit_msleep(2000);
 
-
-  #if 0
-  akit_engine_stop_sound(&engine, "test_sound");
+//  akit_engine_stop_sound(&engine, "test_sound");
 
 
   akit_engine_push_sound(&engine, (AkitSound){
@@ -75,21 +78,16 @@ int main(int argc, char *argv[]) {
     .name = "test2",
     .world_info = world_info
   });
+#endif
 
-  #endif
 
-
-  float p = 1.0f;
 
   while (akit_engine_is_playing(&engine)) {
-    #if 0
-    akit_engine_update_sound(&engine, "test_sound", (AkitSound){
-       .gain = p
-    });
-    #endif
+   // akit_engine_update_sound(&engine, "test_sound", (AkitSound){
+    //   .gain = p
+   // });
     akit_msleep(10);
 
-    p *= 0.99f;
   }
 
   akit_engine_stop(&engine);

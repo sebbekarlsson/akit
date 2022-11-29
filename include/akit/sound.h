@@ -3,12 +3,10 @@
 #include <stdint.h>
 #include <vec3/vec3.h>
 #include <akit/listener.h>
+#include <akit/plugin_reverb_config.h>
 #include <stdbool.h>
-
-typedef struct {
-  Vector3 size;
-  float roughness;
-} AkitWorldInfo;
+#include <mac/buffer.h>
+#include <mac/list.h>
 
 typedef struct {
   float* data;
@@ -16,7 +14,6 @@ typedef struct {
   float sample_rate;
   Vector3 position;
   Vector3 velocity;
-  AkitWorldInfo world_info;
   double duration;
   int64_t channels;
   int64_t block_align;
@@ -26,8 +23,12 @@ typedef struct {
   bool ignore_full;
   float gain;
   bool no_processing;
+  float random_seed;
+  float random_factor;
   const char* name;
   float fade_time;
+
+  AkitPluginReverbConfig reverb;
 } AkitSound;
 
 
@@ -44,6 +45,7 @@ typedef struct {
 
   float fade_in;
   float fade_out;
+  float timeshift;
 
   char* name;
 
@@ -51,10 +53,15 @@ typedef struct {
 } AkitSoundClip;
 
 
-void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener, float* left_gain, float* right_gain);
+MAC_DEFINE_BUFFER(AkitSoundClip);
+MAC_DEFINE_LIST(AkitSoundClip);
+
+void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* left_gain, float* right_gain);
 
 float akit_sound_compute_fader(AkitSoundClip* clip);
 
 
 void akit_sound_clip_destroy(AkitSoundClip* clip);
+
+bool akit_sound_clip_wants_randomness(AkitSoundClip* clip);
 #endif
