@@ -45,8 +45,8 @@ void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
   Vector3 sound_dir =
       vector3_unit(vector3_sub(sound.position, listener.position));
 
-  left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, 0.33f));
-  right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, 0.33f));
+  left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, 0.1f));
+  right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, 0.1f));
 
   float left_dot = vector3_dot(left_dir, sound_dir);
   float right_dot = vector3_dot(right_dir, sound_dir);
@@ -55,8 +55,8 @@ void akit_sound_compute_gain(AkitSoundClip* clip, AkitListener listener,
   left = left_dot * inv_dist;
   right = right_dot * inv_dist;
 
-  left += inv_dist * 0.33f;
-  right += inv_dist * 0.33f;
+  left += inv_dist * 0.05f;
+  right += inv_dist * 0.05f;
 
   left = akit_clamp(left, 0.0f, 1.0f);
   right = akit_clamp(right, 0.0f, 1.0f);

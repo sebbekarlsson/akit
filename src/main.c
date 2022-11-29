@@ -49,9 +49,10 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .name = "test_sound",
-    .gain = 0.5f,
-    .world_info = world_info,
-    .fade_time = 2.0f
+    .gain = 0.6f,
+    .position = VEC3(8.0f, 0.0f, 1.0f),
+    .world_info = world_info
+    //.fade_time = 2.0f
   });
 
 
@@ -81,9 +82,11 @@ int main(int argc, char *argv[]) {
   float p = 1.0f;
 
   while (akit_engine_is_playing(&engine)) {
+    #if 0
     akit_engine_update_sound(&engine, "test_sound", (AkitSound){
        .gain = p
     });
+    #endif
     akit_msleep(10);
 
     p *= 0.99f;
