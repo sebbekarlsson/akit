@@ -55,8 +55,8 @@ void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* lef
   Vector3 sound_dir =
       vector3_unit(vector3_sub(position, listener.position));
 
-  left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, 0.25f));
-  right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, 0.25f));
+  left_dir = vector3_unit(vector3_lerp_factor(left_dir, forward, listener.ear_forward_bend));
+  right_dir = vector3_unit(vector3_lerp_factor(right_dir, forward, listener.ear_forward_bend));
 
   float left_dot = vector3_dot(left_dir, sound_dir);
   float right_dot = vector3_dot(right_dir, sound_dir);
@@ -65,8 +65,8 @@ void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* lef
   left = left_dot * inv_dist;
   right = right_dot * inv_dist;
 
-  left += inv_dist * 0.25f;
-  right += inv_dist * 0.25f;
+  left += inv_dist * (listener.ear_forward_bend / 2.0f);
+  right += inv_dist * (listener.ear_forward_bend  / 2.0f);
 
   left = akit_clamp(left, 0.0f, 1.0f);
   right = akit_clamp(right, 0.0f, 1.0f);

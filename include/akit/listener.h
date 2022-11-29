@@ -6,5 +6,6 @@ typedef struct {
   Vector3 up;
   Vector3 position;
   float distance_multiplier;
+  float ear_forward_bend;
 } AkitListener;
 #endif
