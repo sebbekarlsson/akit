@@ -182,8 +182,26 @@ int akit_driver_asound_destroy(AkitDriver *driver) {
 
   AkitDriverAsound *asound = (AkitDriverAsound *)driver->driver;
 
+  //snd_pcm_hw_params_alloca(&asound->params);
+  //snd_pcm_sw_params_alloca(&asound->sw_params);
+
+  snd_pcm_abort(asound->pcm_handle);
+
+
+  asound->params = 0;
+  asound->sw_params = 0;
   snd_pcm_close(asound->pcm_handle);
-  snd_pcm_drain(asound->pcm_handle);
+
+  snd_config_update_free_global();
+
+    if (asound->params) {
+    snd_pcm_hw_params_free(asound->params);
+  }
+  if (asound->sw_params) {
+    snd_pcm_sw_params_free(asound->sw_params);
+  }
+
+//  snd_pcm_drain(asound->pcm_handle);
 
   free(asound);
   driver->driver = 0;

@@ -79,19 +79,23 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     return 0;
   }
 
+ if (!akit_engine_is_running(engine)) AKIT_WARNING_RETURN(0, stderr, "Akit Engine not running.\n");
+
   sound.sample_rate =
       OR(sound.sample_rate, akit_engine_get_sample_rate(engine));
 
   AkitSoundClip clip = {0}; // NEW(AkitSoundClip);
   clip.sound = sound;
   clip.finished = false;
-  clip.cursor = clip.sound.cursor_start;
+  clip.cursor = 0;//clip.sound.cursor_start;
   clip.time_pushed = 0;
   clip.sound.gain = akit_clamp(sound.gain, 0.0f, M_PI);
   clip.fade_in = 0.0f;
   clip.fade_out = 0.0f;
 
-  pthread_mutex_lock(&engine->process_lock);
+  if (pthread_mutex_trylock(&engine->process_lock) != 0) {
+    AKIT_WARNING_RETURN(0, stderr, "Failed to push sound (Mutex error).\n");
+  }
 
   AkitTrack *track = akit_engine_get_available_track(engine);
 
@@ -101,6 +105,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     return 0;
   }
 
+  #if 0
   if (sound.reverb.mix > 0.00001f && sound.reverb.delay > 0.001f &&
       sound.no_processing == false) {
     if (track->plugins.length <= 0) {
@@ -110,6 +115,7 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
       akit_track_push_plugin(track, reverb);
     }
   }
+  #endif
 
   akit_track_push(track, clip);
 
@@ -232,4 +238,34 @@ AkitTrack *akit_engine_get_available_track(AkitEngine *engine) {
   }
 
   return 0;
+}
+
+int akit_engine_destroy(AkitEngine* engine) {
+  if (!engine) return 0;
+  if (akit_engine_is_running(engine) || akit_engine_is_playing(engine)) AKIT_WARNING_RETURN(0, stderr, "Please stop the Akit engine first.\n");
+
+  if (engine->tracks != 0) {
+    for (int64_t i = 0; i < engine->tracks_length; i++) {
+      AkitTrack* track = &engine->tracks[i];
+      akit_track_destroy(track);
+    }
+
+    free(engine->tracks);
+    engine->tracks = 0;
+  }
+
+  engine->tracks_length = 0;
+
+  if (engine->tape != 0) {
+    free(engine->tape);
+    engine->tape = 0;
+  }
+
+  engine->frame = 0;
+  engine->time = 0.0f;
+  pthread_mutex_destroy(&engine->push_lock);
+  pthread_mutex_destroy(&engine->process_lock);
+  engine->initialized = false;
+
+  return 1;
 }

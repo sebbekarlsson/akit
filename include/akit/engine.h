@@ -31,7 +31,7 @@ typedef struct AKIT_ENGINE_STRUCT {
   //AkitArray clips;
 
   float* tape;
-  float* tape_fx;
+  //float* tape_fx;
 
 
   pthread_t thread_id;
@@ -76,5 +76,7 @@ bool akit_engine_is_running(AkitEngine* engine);
 
 
 AkitTrack* akit_engine_get_available_track(AkitEngine* engine);
+
+int akit_engine_destroy(AkitEngine* engine);
 
 #endif

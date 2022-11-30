@@ -9,14 +9,19 @@
 int main(int argc, char *argv[]) {
 
 
-  Wave wav = {0};
+  Wave wav1 = {0};
   WaveOptions wav_options = {0};
   wav_options.convert_to_float = true;
-  if (!wav_read(&wav, argv[1], wav_options)) {
+  if (!wav_read(&wav1, "../assets/vocal.wav", wav_options)) {
     fprintf(stderr, "Unable to read wav!\n");
     return 0;
   }
 
+  Wave wav2 = {0};
+  if (!wav_read(&wav2, "../assets/flute.wav", wav_options)) {
+    fprintf(stderr, "Unable to read wav!\n");
+    return 0;
+  }
 
   AkitDriverConfig config = {0};
   config.sample_rate = 44100;
@@ -35,7 +40,12 @@ int main(int argc, char *argv[]) {
 
   akit_msleep(1000);
 
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 2; i++) {
+
+    Wave wav = {0};
+
+    wav = i % 2 == 0 ? wav1 : wav2;
+
 
   akit_engine_push_sound(&engine, (AkitSound){
     .data = wav.data,
@@ -45,7 +55,6 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
  //   .position = VEC3(4.0f, 0.0f, 1.0f),
     .block_align = wav.header.block_align,
-    .name = "test_sound",
     .gain = 0.07f,
     .random_seed = akit_random_range(1.0f, 100.0f),
     .random_factor = 0.99f,
@@ -56,12 +65,12 @@ int main(int argc, char *argv[]) {
     .reverb.pingpong_speed = VEC2(8.0f, 16.0f),
     .fade_time = 0.0f
   });
-  akit_msleep(60);
+  akit_msleep(500);
   }
 
 
+
 #if 0
-  akit_msleep(2000);
 
 //  akit_engine_stop_sound(&engine, "test_sound");
 
@@ -75,7 +84,6 @@ int main(int argc, char *argv[]) {
     .channels = wav.header.channels,
     .block_align = wav.header.block_align,
     .gain = 1.0f,
-    .name = "test2",
     .world_info = world_info
   });
 #endif
@@ -91,11 +99,17 @@ int main(int argc, char *argv[]) {
   }
 
   akit_engine_stop(&engine);
+  akit_engine_destroy(&engine);
 
 
-  if (wav.data) {
-    free(wav.data);
-    wav.data = 0;
+  if (wav1.data) {
+    free(wav1.data);
+    wav1.data = 0;
+  }
+
+  if (wav2.data) {
+    free(wav2.data);
+    wav2.data = 0;
   }
 
   return 0;

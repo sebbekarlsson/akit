@@ -41,13 +41,15 @@ void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* lef
 
   float dist = fabsf(vector3_distance3d(listener.position, position)) * dm;
 
-  if (dist <= 0.0001f) {
+  if (dist <= 0.00001f || akit_number_is_unsafe(dist)) {
     *left_gain = 1.0f;
     *right_gain = 1.0f;
     return;
   }
 
   float inv_dist = safediv(1.0f, dist);
+
+  if (akit_number_is_unsafe(inv_dist)) return;
 
   Vector3 left_right = vector3_unit(vector3_cross(forward, listener.up));
   Vector3 left_dir = vector3_scale(left_right, -1);
@@ -62,24 +64,31 @@ void akit_sound_compute_gain(Vector3 position, AkitListener listener, float* lef
   float right_dot = vector3_dot(right_dir, sound_dir);
 
 
+  if (akit_number_is_unsafe(left_dot) || akit_number_is_unsafe(right_dot)) return;
+
+
   left = left_dot * inv_dist;
   right = right_dot * inv_dist;
 
   left += inv_dist * (listener.ear_forward_bend / 2.0f);
   right += inv_dist * (listener.ear_forward_bend  / 2.0f);
 
-  left = akit_clamp(left, 0.0f, 1.0f);
-  right = akit_clamp(right, 0.0f, 1.0f);
+  left = akit_clamp(left, 0.0f, 1.1f);
+  right = akit_clamp(right, 0.0f, 1.1f);
 
-  if (left < 0 || isnan(left) || isinf(left))
+  if (akit_number_is_unsafe(left))
     left = 0.0f;
-  if (right < 0 || isnan(right) || isinf(right))
+  if (akit_number_is_unsafe(right))
     right = 0.0f;
 
 
 
   *left_gain = left;
   *right_gain = right;
+
+  return;
+
+
 }
 
 void akit_sound_clip_destroy(AkitSoundClip *clip) {
@@ -94,10 +103,6 @@ void akit_sound_clip_destroy(AkitSoundClip *clip) {
   clip->sound.duration = 0;
   clip->sound.sample_rate = 0;
 
-  if (clip->name != 0) {
-    free(clip->name);
-  }
-  clip->name = 0;
 }
 
 

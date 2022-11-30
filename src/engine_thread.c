@@ -17,6 +17,7 @@ void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
   for (int64_t i = 0; i < engine->tracks_length; i++) {
     AkitTrack* track = &engine->tracks[i];
     if (!akit_track_process_block(engine, track, buffer, length, frame, time)) {
+      akit_track_destroy(track);
       continue;
     }
   }
@@ -65,8 +66,8 @@ void *akit_engine_thread(void *ptr) {
     (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
 
 
-   engine->tape_fx =
-      (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
+   //engine->tape_fx =
+     // (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
 
   akit_msleep(1);
   double wanted_delay = time_unit * 1000;
@@ -89,7 +90,11 @@ void *akit_engine_thread(void *ptr) {
     // if (!engine->tape)
     //   continue;
 
-    pthread_mutex_lock(&engine->push_lock);
+    if (pthread_mutex_trylock(&engine->push_lock) != 0) {
+      AKIT_WARNING(stderr, "Unable to lock mutex!\n");
+      akit_msleep(500);
+      continue;
+    }
     akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
                         engine->time, engine->frame);
     pthread_mutex_unlock(&engine->push_lock);

@@ -25,7 +25,6 @@ typedef struct {
   bool no_processing;
   float random_seed;
   float random_factor;
-  const char* name;
   float fade_time;
 
   AkitPluginReverbConfig reverb;
@@ -46,9 +45,6 @@ typedef struct {
   float fade_in;
   float fade_out;
   float timeshift;
-
-  char* name;
-
 
 } AkitSoundClip;
 

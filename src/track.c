@@ -52,6 +52,9 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
   }
 
 
+  if (clip->sound.data == 0) {
+    AKIT_WARNING_RETURN(0, stderr, "Sound clip missing data.\n");
+  }
 
   float sample_rate =
       OR(clip->sound.sample_rate, akit_engine_get_sample_rate(engine));
@@ -71,7 +74,7 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
     akit_sound_compute_gain(clip->sound.position, listener, &left_gain, &right_gain);
   }
 
-  if (clip->sound.fade_time > 0.0f) {
+  if (clip->sound.fade_time > 0.00001f) {
     float fader = akit_sound_compute_fader(clip);
     left_gain *= fader;
     right_gain *= fader;
@@ -80,11 +83,6 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
   left_gain *= clip->sound.gain;
   right_gain *= clip->sound.gain;
 
-  //  int64_t samples_avail = MAX(0, (clip_length / sizeof(float)) -
-  //  clip->cursor);
-
-
-  //int64_t future_delay = sample_rate/2;
 
   if (clip_channels >= 2) {
     for (int64_t i = 0; i < length; i++) {
@@ -96,9 +94,6 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
       float *out_left = &buffer[(i * 2)%tape_length];
       float *out_right = &buffer[(1 + i * 2)%tape_length];
 
-    //  float *out_left_future = &buffer[(future_delay+(i * 2))%tape_length];
-    //  float *out_right_future = &buffer[(future_delay+(1 + i * 2))%tape_length];
-
       float in_left = clip_buffer[i * 2];
       float in_right = clip_buffer[1 + i * 2];
 
@@ -107,14 +102,8 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
       *out_left += (in_left * left_gain);
       *out_right += (in_right * right_gain);
 
-    //  *out_left_future += (in_left * left_gain);
-     // *out_right_future += (in_right * right_gain);
-
       *out_left = akit_dsp_get_corrected_sample(*out_left);
       *out_right = akit_dsp_get_corrected_sample(*out_right);
-
-  //    *out_left_future = akit_dsp_get_corrected_sample(*out_left_future);
-   //   *out_right_future = akit_dsp_get_corrected_sample(*out_right_future);
     }
 
   } else {
@@ -128,9 +117,6 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
       float *out_left = &buffer[i * 2];
       float *out_right = &buffer[1 + i * 2];
 
-    //  float *out_left_future = &buffer[(future_delay+(i * 2))%tape_length];
-     // float *out_right_future = &buffer[(future_delay+(1 + i * 2))%tape_length];
-
       float sample = clip_buffer[i];
 
       akit_dsp_process(engine, clip, &sample, &sample);
@@ -138,15 +124,9 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
       *out_left += (sample * left_gain);
       *out_right += (sample * right_gain);
 
-     // *out_left_future += (sample * left_gain);
-      //*out_right_future += (sample * right_gain);
-
 
       *out_left = akit_dsp_get_corrected_sample(*out_left);
       *out_right = akit_dsp_get_corrected_sample(*out_right);
-
-      //*out_left_future = akit_dsp_get_corrected_sample(*out_left_future);
-      //*out_right_future = akit_dsp_get_corrected_sample(*out_right_future);
     }
   }
 
@@ -167,6 +147,8 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
 }
 
 int akit_track_process_block(struct AKIT_ENGINE_STRUCT* engine, AkitTrack* track, float* buffer, int64_t length, int64_t frame, double time) {
+  if (track->clips.items == 0) return 0;
+
   for (int64_t i = 0; i < track->clips.length; i++) {
     AkitSoundClip* clip = &track->clips.items[i];
 
@@ -192,6 +174,12 @@ int akit_track_process_block(struct AKIT_ENGINE_STRUCT* engine, AkitTrack* track
 
 void akit_track_destroy(AkitTrack* track) {
   if (!track) return;
+
+  for (int64_t i = 0; i < track->clips.length; i++) {
+    AkitSoundClip* clip = &track->clips.items[i];
+    akit_sound_clip_destroy(clip);
+  }
+
   mac_AkitSoundClip_buffer_clear(&track->clips);
 
   for (int64_t i = 0; i < track->plugins.length; i++) {
