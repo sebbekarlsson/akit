@@ -63,12 +63,12 @@ int akit_engine_stop(AkitEngine *engine) {
 bool akit_engine_is_running(AkitEngine *engine) {
   if (!engine)
     return false;
+  if (engine->tape == 0) return false;
   return engine->running;
 }
 
 int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
-  if (!engine->running)
-    return 0;
+ if (!akit_engine_is_running(engine)) AKIT_WARNING_RETURN(0, stderr, "Akit Engine not running.\n");
   if (sound.data == 0)
     return 0;
   if (sound.length == 0)
@@ -79,7 +79,6 @@ int akit_engine_push_sound(AkitEngine *engine, AkitSound sound) {
     return 0;
   }
 
- if (!akit_engine_is_running(engine)) AKIT_WARNING_RETURN(0, stderr, "Akit Engine not running.\n");
 
   sound.sample_rate =
       OR(sound.sample_rate, akit_engine_get_sample_rate(engine));

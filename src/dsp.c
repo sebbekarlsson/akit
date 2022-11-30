@@ -26,7 +26,7 @@ float akit_dsp_get_corrected_sample(
 
 
 void akit_dsp_process(AkitEngine* engine, AkitSoundClip* clip, float* left, float* right) {
-
+  if (!left || !right) return;
 
   float L = *left;
   float R = *right;

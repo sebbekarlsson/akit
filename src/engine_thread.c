@@ -12,15 +12,21 @@
 #include <mif/fft.h>
 #include <string.h>
 
-void akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
+bool akit_engine_process(AkitEngine *engine, float *buffer, int64_t length,
                          double time, int64_t frame) {
+  bool playing = false;
+
   for (int64_t i = 0; i < engine->tracks_length; i++) {
     AkitTrack* track = &engine->tracks[i];
-    if (!akit_track_process_block(engine, track, buffer, length, frame, time)) {
+    if (akit_track_process_block(engine, track, buffer, length, frame, time)) {
+      playing = true;
+    } else {
       akit_track_destroy(track);
       continue;
     }
   }
+
+  return playing;
 }
 
 void *akit_engine_thread(void *ptr) {
@@ -69,13 +75,15 @@ void *akit_engine_thread(void *ptr) {
    //engine->tape_fx =
      // (float *)calloc(tape_length * AKIT_TAPE_LENGTH_MULTIPLIER, sizeof(float));
 
-  akit_msleep(1);
+  akit_msleep(16);
   double wanted_delay = time_unit * 1000;
+
+  bool playing = true;
 
   while (akit_engine_is_running(engine)) {
 
     //if (akit_array_is_empty(&engine->clips)) {
-    if (!akit_engine_is_playing(engine)) {
+    if (!playing) {
       akit_msleep(wanted_delay);
       akit_engine_clear_tape(engine);
       akit_driver_flush(&engine->driver);
@@ -87,15 +95,12 @@ void *akit_engine_thread(void *ptr) {
       pthread_mutex_unlock(&engine->push_lock);
     }
 
-    // if (!engine->tape)
-    //   continue;
-
     if (pthread_mutex_trylock(&engine->push_lock) != 0) {
       AKIT_WARNING(stderr, "Unable to lock mutex!\n");
       akit_msleep(500);
       continue;
     }
-    akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
+    playing = akit_engine_process(engine, &engine->tape[engine->frame], frame_length,
                         engine->time, engine->frame);
     pthread_mutex_unlock(&engine->push_lock);
 
@@ -119,7 +124,7 @@ void *akit_engine_thread(void *ptr) {
 
       akit_engine_clear_tape(engine);
 
-      if (got_delay > wanted_delay) {
+      if (got_delay > wanted_delay && playing == false) {
         akit_driver_flush(&engine->driver);
         akit_driver_reset(&engine->driver);
       }
@@ -133,7 +138,6 @@ void *akit_engine_thread(void *ptr) {
       engine->time = 0.0f;
     }
 
-    // akit_driver_wait(&engine->driver, 1);
   }
 
   akit_driver_destroy(&engine->driver);
