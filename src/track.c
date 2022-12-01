@@ -11,15 +11,20 @@ int akit_track_init(AkitTrack* track) {
   if (!track) return 0;
   if (track->initialized) return 1;
   track->initialized = true;
-  mac_AkitSoundClip_buffer_init(&track->clips);
+  mac_AkitSoundClip_list_init(&track->clips);
   mac_AkitPlugin_buffer_init(&track->plugins);
+  pthread_mutex_init(&track->clips_mutex, 0);
   return 1;
 }
 
 int akit_track_push(AkitTrack* track, AkitSoundClip clip) {
   if (!track) return 0;
   if (!track->initialized) AKIT_WARNING_RETURN(0, stderr, "Track Not initialized.\n");
-  mac_AkitSoundClip_buffer_push(&track->clips, clip);
+  if (track->clips.length >= AKIT_CLIPS_PER_TRACK) return 0;
+
+  AkitSoundClip* _clip = NEW(AkitSoundClip);
+  *_clip = clip;
+  mac_AkitSoundClip_list_push(&track->clips, _clip);
   return 1;
 }
 
@@ -149,16 +154,22 @@ int akit_track_process_clip(AkitEngine* engine, AkitTrack* track, AkitSoundClip*
 int akit_track_process_block(struct AKIT_ENGINE_STRUCT* engine, AkitTrack* track, float* buffer, int64_t length, int64_t frame, double time) {
   if (track->clips.items == 0) return 0;
 
-  for (int64_t i = 0; i < track->clips.length; i++) {
-    AkitSoundClip* clip = &track->clips.items[i];
+  int64_t nr_clips = track->clips.length;
+
+  for (int64_t i = 0; i < nr_clips; i++) {
+    AkitSoundClip* clip = track->clips.items[i];
 
     if (!akit_track_process_clip(engine, track, clip, buffer, length, frame, time)) {
       akit_sound_clip_destroy(clip);
-      mac_AkitSoundClip_buffer_remove(&track->clips, i);
+      mac_AkitSoundClip_list_remove(&track->clips, clip);
+      free(clip);
+      clip = 0;
+      //mac_AkitSoundClip_list_remove(&track->clips, i);
       continue;
     }
   }
 
+  #if 0
   for (int64_t i = 0; i < track->plugins.length; i++) {
     AkitPlugin* plugin = &track->plugins.items[i];
 
@@ -168,24 +179,29 @@ int akit_track_process_block(struct AKIT_ENGINE_STRUCT* engine, AkitTrack* track
       continue;
     }
   }
+  #endif
 
-  return track->clips.length > 0 || track->plugins.length > 0;
+  return track->clips.length > 0;// || track->plugins.length > 0;
 }
 
 void akit_track_destroy(AkitTrack* track) {
   if (!track) return;
 
+  pthread_mutex_lock(&track->clips_mutex);
   for (int64_t i = 0; i < track->clips.length; i++) {
-    AkitSoundClip* clip = &track->clips.items[i];
+    AkitSoundClip* clip = track->clips.items[i];
     akit_sound_clip_destroy(clip);
   }
 
-  mac_AkitSoundClip_buffer_clear(&track->clips);
+  mac_AkitSoundClip_list_clear(&track->clips);
+  pthread_mutex_unlock(&track->clips_mutex);
 
+  #if 0
   for (int64_t i = 0; i < track->plugins.length; i++) {
     AkitPlugin* plugin = &track->plugins.items[i];
     akit_plugin_destroy(plugin);
   }
 
   mac_AkitPlugin_buffer_clear(&track->plugins);
+  #endif
 }

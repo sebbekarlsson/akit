@@ -8,7 +8,8 @@
 struct AKIT_ENGINE_STRUCT;
 
 typedef struct {
-  AkitSoundClipBuffer clips;
+  AkitSoundClipList clips;
+  pthread_mutex_t clips_mutex;
   AkitPluginBuffer plugins;
   bool initialized;
 } AkitTrack;

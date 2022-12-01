@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
   akit_msleep(1000);
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 50; i++) {
 
     Wave wav = {0};
 
