@@ -42,6 +42,23 @@ if (NOT TARGET hashmap_static)
   FetchContent_MakeAvailable(hashmap_static)
 endif()
 
+
+if (NOT TARGET mif_static)
+  FetchContent_Declare(
+    mif_static
+    URL /home/ianertson/workspace/mif
+  )
+  FetchContent_MakeAvailable(mif_static)
+endif()
+
+if (NOT TARGET spath_static)
+  FetchContent_Declare(
+    spath_static
+    URL /home/ianertson/workspace/spath
+  )
+  FetchContent_MakeAvailable(spath_static)
+endif()
+
   if (NOT TARGET hashy_static)
 
     FetchContent_Declare(
@@ -75,6 +92,8 @@ function (akit_init TARGET_NAME)
     cglm
     asound
     pthread
+    mif
+    spath
   )
 endfunction()
 

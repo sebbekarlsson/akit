@@ -5,9 +5,38 @@
 #include <stdio.h>
 #include <waves/wav.h>
 #include <stdlib.h>
+#include <string.h>
+
+
+int akit_main_slice(int argc, char *argv[]) {
+  if (argc < 4) return 0;
+
+
+    Wave wav = {0};
+  WaveOptions wav_options = {0};
+  wav_options.convert_to_float = true;
+  if (!wav_read(&wav, argv[2], wav_options)) {
+    fprintf(stderr, "Unable to read wav!\n");
+    return 0;
+  }
+
+  akit_dsp_extract_onsets(wav, argv[3]);
+
+  return 0;
+}
+
 
 int main(int argc, char *argv[]) {
 
+  if (argc < 2) goto nothing_specified;
+
+  if (strcmp(argv[1], "slice") == 0) {
+    return akit_main_slice(argc, argv);
+  } else {
+    nothing_specified:
+    fprintf(stderr, "Please specify an action to perform.\n");
+    return 1;
+  }
 
   Wave wav = {0};
   WaveOptions wav_options = {0};
@@ -16,6 +45,9 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Unable to read wav!\n");
     return 0;
   }
+
+
+
 
 
   AkitDriverConfig config = {0};
