@@ -1,5 +1,8 @@
 # Akit (Audio kit)
-> 3D Audio engine
+> 3D Audio engine for Linux
+
+## Dependencies
+> Currently, the only driver supported is `alsa`.
 
 ## Example usage
 ```C
