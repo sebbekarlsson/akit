@@ -14,7 +14,7 @@ add_library(akit SHARED ${sourcefiles})
 add_library(akit_static STATIC ${sourcefiles})
 
 
-target_compile_options(akit_e PUBLIC -g -Wall)
+target_compile_options(akit_e PRIVATE -g -Wall)
 
 include(FetchContent)
 
